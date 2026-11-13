@@ -158,7 +158,6 @@
   </div>
 
   <script>
-    // 👇 PEGA AQUÍ TU ENLACE DE APPS SCRIPT (EL QUE TERMINA EN /exec)
     const API_URL = 'https://script.google.com/macros/s/AKfycbyR4yMqNIjj_25Dv2tgylrxGBd3km1fzviXMB_T6u7eC6SaRPzR2YYjp1fdllSsVHnI/exec';
 
     let inventory = [];
@@ -172,10 +171,6 @@
     }
 
     async function loadData() {
-      if (API_URL === 'https://script.google.com/macros/s/AKfycbyR4yMqNIjj_25Dv2tgylrxGBd3km1fzviXMB_T6u7eC6SaRPzR2YYjp1fdllSsVHnI/exec') {
-        alert('Recuerda pegar tu enlace /exec en la variable API_URL dentro del código.');
-        return;
-      }
       setLoading(true);
       try {
         const res = await fetch(API_URL);
