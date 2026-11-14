@@ -380,7 +380,7 @@
       let optionsHtml = `<option value="">Precio: Todos</option>`;
       for (let min = 0; min < topLimit; min += 10) {
         const max = min + 10;
-        optionsHtml += `<option value="${min}-${max}">$${min} a$${max}</option>`;
+        optionsHtml += `<option value="${min}-${max}">$${min} a $${max}</option>`;
       }
       el.innerHTML = optionsHtml;
       el.value = current;
@@ -488,7 +488,7 @@
 
       const groupsMap = new Map();
       filtered.forEach(p => {
-        const key = `${p.categoria}\vert{}\vert{}\vert{}${p.item}`;
+        const key = `${p.categoria}|||${p.item}`;
         if (!groupsMap.has(key)) {
           groupsMap.set(key, {
             key: key,
@@ -520,12 +520,12 @@
         const prices = [...new Set(colorVariants.map(v => Number(v.precio) || 0))];
         const priceDisplay = prices.length === 1 
           ? formatPrice(prices[0]) 
-          : `${formatPrice(Math.min(...prices))} -${formatPrice(Math.max(...prices))}`;
+          : `${formatPrice(Math.min(...prices))} - ${formatPrice(Math.max(...prices))}`;
 
         const totalModelUnits = group.variants.reduce((sum, v) => sum + v.cantidad, 0);
 
         const imgHtml = activeImg
-          ? `<img src="${activeImg}" onclick="showImage('${activeImg}', '${group.item} ·${activeColor}')" class="w-20 h-20 shrink-0 object-cover rounded-2xl border border-teal-100 cursor-pointer hover:scale-105 transition shadow-xs" onerror="this.src='https://placehold.co/120x120/f0fdfa/0d9488?text=Sin+Foto'">`
+          ? `<img src="${activeImg}" onclick="showImage('${activeImg}', '${group.item} · ${activeColor}')" class="w-20 h-20 shrink-0 object-cover rounded-2xl border border-teal-100 cursor-pointer hover:scale-105 transition shadow-xs" onerror="this.src='https://placehold.co/120x120/f0fdfa/0d9488?text=Sin+Foto'">`
           : `<div class="w-20 h-20 shrink-0 rounded-2xl bg-gradient-to-br from-teal-50 to-purple-50 border border-purple-100 flex items-center justify-center text-purple-300 text-xs font-semibold text-center leading-tight">Sin<br>foto</div>`;
 
         // Botones de colores con círculo visual + nombre del color + cantidad
@@ -608,7 +608,7 @@
 
               <div class="mt-3.5 pt-3 border-t border-slate-100">
                 <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 px-1">
-                  <span class="flex items-center gap-1.5">Tallas en ${renderColorDot(activeColor)}${activeColor}</span>
+                  <span class="flex items-center gap-1.5">Tallas en ${renderColorDot(activeColor)} ${activeColor}</span>
                   <span>Stock / Acciones</span>
                 </div>
                 <div class="space-y-1.5">
@@ -639,7 +639,7 @@
         else if (p.cantidad <= 5) badge = `<span class="px-3 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800">${p.cantidad} unid.</span>`;
 
         const imgHtml = p.imagen 
-          ? `<img src="${p.imagen}" onclick="showImage('${p.imagen}', '${p.item} ·${p.color}')" class="w-11 h-11 object-cover rounded-xl border border-teal-100 cursor-pointer hover:scale-105 transition shadow-2xs" onerror="this.src='https://placehold.co/80x80/f0fdfa/0d9488?text=Sin+Foto'">`
+          ? `<img src="${p.imagen}" onclick="showImage('${p.imagen}', '${p.item} · ${p.color}')" class="w-11 h-11 object-cover rounded-xl border border-teal-100 cursor-pointer hover:scale-105 transition shadow-2xs" onerror="this.src='https://placehold.co/80x80/f0fdfa/0d9488?text=Sin+Foto'">`
           : `<div class="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-50 to-purple-50 border border-purple-100 flex items-center justify-center text-purple-300 text-[10px] font-semibold text-center leading-tight">Sin<br>foto</div>`;
 
         return `
@@ -657,4 +657,133 @@
               <span class="px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200/70 rounded-lg text-xs font-bold">${p.talla}</span>
             </td>
             <td class="py-3 px-4">
-              <div class="flex items-
+              <div class="flex items-center justify-center gap-2">
+                <button onclick="changeStock('${p.id}', -1)" class="w-7 h-7 rounded-lg bg-teal-50 hover:bg-teal-100 border border-teal-200 font-bold text-teal-800 transition">-</button>
+                <div class="min-w-[76px] text-center">${badge}</div>
+                <button onclick="changeStock('${p.id}', 1)" class="w-7 h-7 rounded-lg bg-purple-50 hover:bg-purple-100 border border-purple-200 font-bold text-purple-800 transition">+</button>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-right space-x-2.5">
+              <button onclick='editProduct(${JSON.stringify(p)})' class="text-xs font-bold text-teal-600 hover:text-teal-800 hover:underline">Editar</button>
+              <button onclick="removeProduct('${p.id}')" class="text-xs font-bold text-rose-500 hover:text-rose-700 hover:underline">Eliminar</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Móvil
+      mobileCards.innerHTML = filtered.map(p => {
+        let badge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-100 text-teal-800">${p.cantidad} disp.</span>`;
+        if (p.cantidad === 0) badge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700">Agotado</span>`;
+        else if (p.cantidad <= 5) badge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800">${p.cantidad} unid.</span>`;
+
+        const mobileImgHtml = p.imagen 
+          ? `<img src="${p.imagen}" onclick="showImage('${p.imagen}', '${p.item} · ${p.color}')" class="w-16 h-16 shrink-0 object-cover rounded-xl border border-teal-100 cursor-pointer shadow-2xs" onerror="this.src='https://placehold.co/96x96/f0fdfa/0d9488?text=Sin+Foto'">`
+          : `<div class="w-16 h-16 shrink-0 rounded-xl bg-gradient-to-br from-teal-50 to-purple-50 border border-purple-100 flex items-center justify-center text-purple-300 text-[11px] font-semibold text-center leading-tight">Sin<br>foto</div>`;
+
+        return `
+          <div class="bg-white rounded-2xl border border-purple-100/90 p-3.5 shadow-xs">
+            <div class="flex gap-3 items-start">
+              ${mobileImgHtml}
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2">
+                  <h3 class="font-bold text-slate-900 text-sm leading-snug">${p.item}</h3>
+                  <span class="shrink-0 font-extrabold text-sm text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg border border-teal-100">${formatPrice(p.precio)}</span>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-1.5 mt-2">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700">
+                    ${renderColorDot(p.color)}
+                    <span>Color: <strong class="text-slate-900">${p.color}</strong></span>
+                  </span>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200/70">
+                    Talla: ${p.talla}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-3 mt-3 border-t border-slate-100">
+              <div class="flex items-center gap-2">
+                <button onclick="changeStock('${p.id}', -1)" class="w-8 h-8 rounded-xl bg-teal-50 active:bg-teal-100 border border-teal-200 font-bold text-teal-800 text-base flex items-center justify-center">-</button>
+                <div class="min-w-[74px] text-center">${badge}</div>
+                <button onclick="changeStock('${p.id}', 1)" class="w-8 h-8 rounded-xl bg-purple-50 active:bg-purple-100 border border-purple-200 font-bold text-purple-800 text-base flex items-center justify-center">+</button>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <button onclick='editProduct(${JSON.stringify(p)})' class="text-xs font-bold text-teal-600 hover:text-teal-800 px-2 py-1 rounded-lg bg-teal-50/50">Editar</button>
+                <button onclick="removeProduct('${p.id}')" class="text-xs font-bold text-rose-500 hover:text-rose-700 px-2 py-1 rounded-lg bg-rose-50/50">Eliminar</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function changeStock(id, delta) {
+      const item = inventory.find(i => i.id === id);
+      if (item) {
+        item.cantidad = Math.max(0, item.cantidad + delta);
+        renderResults();
+      }
+      await sendAction({ action: 'updateStock', id: id, delta: delta });
+    }
+
+    function openModal() {
+      document.getElementById('modal-title').textContent = 'Agregar Producto';
+      document.getElementById('product-form').reset();
+      document.getElementById('prod-id').value = '';
+      if (selectedCategory) document.getElementById('prod-cat').value = selectedCategory;
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function editProduct(p) {
+      document.getElementById('modal-title').textContent = 'Editar Variante';
+      document.getElementById('prod-id').value = p.id;
+      document.getElementById('prod-cat').value = p.categoria;
+      document.getElementById('prod-item').value = p.item;
+      document.getElementById('prod-color').value = p.color;
+      document.getElementById('prod-talla').value = p.talla;
+      document.getElementById('prod-price').value = p.precio || 0;
+      document.getElementById('prod-qty').value = p.cantidad;
+      document.getElementById('prod-img').value = p.imagen || '';
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    async function handleSave(e) {
+      e.preventDefault();
+      const btn = document.getElementById('save-btn');
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+
+      const product = {
+        id: document.getElementById('prod-id').value,
+        categoria: document.getElementById('prod-cat').value.trim(),
+        item: document.getElementById('prod-item').value.trim(),
+        color: document.getElementById('prod-color').value.trim(),
+        talla: document.getElementById('prod-talla').value.trim(),
+        precio: Number(document.getElementById('prod-price').value) || 0,
+        cantidad: Number(document.getElementById('prod-qty').value),
+        imagen: document.getElementById('prod-img').value.trim(),
+        mode: 'add'
+      };
+
+      await sendAction({ action: 'save', product: product });
+      closeModal();
+      btn.disabled = false;
+      btn.textContent = 'Guardar';
+    }
+
+    async function removeProduct(id) {
+      if (!confirm('¿Eliminar esta variante del inventario?')) return;
+      setLoading(true);
+      await sendAction({ action: 'delete', id: id });
+      setLoading(false);
+    }
+  </script>
+</body>
+</html>
