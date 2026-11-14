@@ -34,7 +34,7 @@
       <div class="flex items-center gap-3.5">
         <img 
           src="https://i.ibb.co/93V1rXQD/logo.png" 
-          onerror="this.onerror=null; this.src='https://ibb.co/93V1rXQD'; this.style.display='none';"
+          onerror="this.style.display='none';"
           alt="Glow Up Logo" 
           class="h-12 w-12 md:h-14 md:w-14 object-contain rounded-xl bg-gradient-to-br from-teal-50 to-purple-50 p-1 border border-teal-100 shadow-xs"
         >
@@ -72,23 +72,28 @@
       <div id="category-tabs" class="flex flex-wrap gap-2"></div>
     </div>
 
-    <!-- Barra de filtros secundarios + Botón Limpiar -->
+    <!-- Barra de filtros secundarios + Rango de Precio + Botón Limpiar -->
     <div class="bg-white/90 backdrop-blur-md p-3.5 rounded-2xl border border-teal-100 shadow-sm mb-6">
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-2.5 items-center">
-        <div class="md:col-span-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 items-center">
+        <div class="lg:col-span-3">
           <input type="text" id="search-input" oninput="handleFilterChange()" placeholder="Buscar modelo o prenda..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 bg-slate-50/50">
         </div>
-        <div class="md:col-span-3">
+        <div class="lg:col-span-2">
+          <select id="filter-price" onchange="handleFilterChange()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-400">
+            <option value="">Todos los precios</option>
+          </select>
+        </div>
+        <div class="lg:col-span-2">
           <select id="filter-color" onchange="handleFilterChange()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400">
             <option value="">Todos los colores</option>
           </select>
         </div>
-        <div class="md:col-span-2">
+        <div class="lg:col-span-2">
           <select id="filter-talla" onchange="handleFilterChange()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400">
             <option value="">Todas las tallas</option>
           </select>
         </div>
-        <div class="md:col-span-3 flex items-center gap-2">
+        <div class="lg:col-span-3 flex items-center gap-2">
           <select id="filter-status" onchange="handleFilterChange()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400">
             <option value="">Disponibilidad</option>
             <option value="ok">Disponible (> 0)</option>
@@ -113,13 +118,14 @@
       <span class="ml-3 text-sm font-semibold text-purple-700">Sincronizando inventario Glow Up...</span>
     </div>
 
-    <!-- Tabla (Sin columna Categoría) -->
+    <!-- Tabla con orden: Foto, Ítem, Precio, Color, Talla, Cantidad, Acciones -->
     <div id="table-container" class="hidden bg-white rounded-2xl border border-purple-100 shadow-sm overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-gradient-to-r from-teal-50/80 to-purple-50/80 border-b border-purple-100 text-xs font-bold text-slate-600 uppercase tracking-wider">
             <th class="py-3.5 px-4 w-16">Foto</th>
-            <th class="py-3.5 px-4">Ítem / Modelo</th>
+            <th class="py-3.5 px-4">Ítem</th>
+            <th class="py-3.5 px-4">Precio</th>
             <th class="py-3.5 px-4">Color</th>
             <th class="py-3.5 px-4">Talla</th>
             <th class="py-3.5 px-4 text-center">Cantidad</th>
@@ -164,13 +170,18 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Precio ($)</label>
+            <input type="number" id="prod-price" min="0" step="0.01" required placeholder="0.00" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-purple-400 focus:outline-none">
+          </div>
+          <div>
             <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Cantidad</label>
             <input type="number" id="prod-qty" min="0" required value="1" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-teal-400 focus:outline-none">
           </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">URL de Foto (Opcional)</label>
-            <input type="url" id="prod-img" placeholder="https://i.ibb.co/..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-teal-400 focus:outline-none">
-          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">URL de Foto (Opcional)</label>
+          <input type="url" id="prod-img" placeholder="https://i.postimg.cc/..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-teal-400 focus:outline-none">
         </div>
 
         <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
@@ -257,17 +268,19 @@
     function updateClearButtonVisibility() {
       const hasSearch = document.getElementById('search-input').value.trim() !== '';
       const hasCat = selectedCategory !== '';
+      const hasPrice = document.getElementById('filter-price').value !== '';
       const hasColor = document.getElementById('filter-color').value !== '';
       const hasTalla = document.getElementById('filter-talla').value !== '';
       const hasStatus = document.getElementById('filter-status').value !== '';
 
-      const isAnyActive = hasSearch || hasCat || hasColor || hasTalla || hasStatus;
+      const isAnyActive = hasSearch || hasCat || hasPrice || hasColor || hasTalla || hasStatus;
       document.getElementById('clear-filters-btn').classList.toggle('hidden', !isAnyActive);
     }
 
     function clearAllFilters() {
       selectedCategory = '';
       document.getElementById('search-input').value = '';
+      document.getElementById('filter-price').value = '';
       document.getElementById('filter-color').value = '';
       document.getElementById('filter-talla').value = '';
       document.getElementById('filter-status').value = '';
@@ -297,6 +310,21 @@
       container.innerHTML = html;
     }
 
+    function updatePriceRanges() {
+      const el = document.getElementById('filter-price');
+      const current = el.value;
+      const maxPrice = inventory.reduce((max, i) => Math.max(max, Number(i.precio) || 0), 0);
+      const topLimit = Math.max(50, Math.ceil((maxPrice + 1) / 10) * 10);
+
+      let optionsHtml = `<option value="">Todos los precios</option>`;
+      for (let min = 0; min < topLimit; min += 10) {
+        const max = min + 10;
+        optionsHtml += `<option value="${min}-${max}">$${min} a $${max}</option>`;
+      }
+      el.innerHTML = optionsHtml;
+      el.value = current;
+    }
+
     function updateFilters() {
       const cats = [...new Set(inventory.map(i => i.categoria))].sort();
       const colors = [...new Set(inventory.map(i => i.color))].sort();
@@ -304,6 +332,7 @@
       const items = [...new Set(inventory.map(i => i.item))].sort();
 
       renderCategoryTabs();
+      updatePriceRanges();
       fillSelect('filter-color', colors, 'Todos los colores');
       fillSelect('filter-talla', tallas, 'Todas las tallas');
 
@@ -332,30 +361,44 @@
       document.getElementById('img-modal').classList.remove('hidden');
     }
 
+    function formatPrice(val) {
+      const num = Number(val) || 0;
+      return '$' + num.toFixed(2);
+    }
+
     function renderTable() {
       const search = document.getElementById('search-input').value.toLowerCase();
+      const fPrice = document.getElementById('filter-price').value;
       const fColor = document.getElementById('filter-color').value;
       const fTalla = document.getElementById('filter-talla').value;
       const fStatus = document.getElementById('filter-status').value;
 
       const filtered = inventory.filter(p => {
+        const priceNum = Number(p.precio) || 0;
         const matchSearch = p.item.toLowerCase().includes(search) || p.categoria.toLowerCase().includes(search);
         const matchCat = !selectedCategory || p.categoria === selectedCategory;
         const matchColor = !fColor || p.color === fColor;
         const matchTalla = !fTalla || p.talla === fTalla;
+
+        let matchPrice = true;
+        if (fPrice) {
+          const [minP, maxP] = fPrice.split('-').map(Number);
+          matchPrice = priceNum >= minP && priceNum <= maxP;
+        }
+
         let matchStatus = true;
         if (fStatus === 'ok') matchStatus = p.cantidad > 0;
         if (fStatus === 'low') matchStatus = p.cantidad > 0 && p.cantidad <= 5;
         if (fStatus === 'out') matchStatus = p.cantidad === 0;
-        return matchSearch && matchCat && matchColor && matchTalla && matchStatus;
+
+        return matchSearch && matchCat && matchPrice && matchColor && matchTalla && matchStatus;
       });
 
-      // Solo actualizamos el Total de Unidades
       document.getElementById('stat-total').textContent = filtered.reduce((acc, i) => acc + i.cantidad, 0);
 
       const tbody = document.getElementById('inventory-body');
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-10 text-center text-slate-500">No se encontraron prendas con esos filtros.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-slate-500">No se encontraron prendas con esos filtros.</td></tr>`;
         return;
       }
 
@@ -372,6 +415,7 @@
           <tr class="hover:bg-purple-50/30 transition">
             <td class="py-2.5 px-4">${imgHtml}</td>
             <td class="py-3 px-4 font-bold text-slate-800">${p.item}</td>
+            <td class="py-3 px-4 font-bold text-teal-700">${formatPrice(p.precio)}</td>
             <td class="py-3 px-4 text-slate-600 font-medium">${p.color}</td>
             <td class="py-3 px-4">
               <span class="px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200/70 rounded-lg text-xs font-bold">${p.talla}</span>
@@ -416,6 +460,7 @@
       document.getElementById('prod-item').value = p.item;
       document.getElementById('prod-color').value = p.color;
       document.getElementById('prod-talla').value = p.talla;
+      document.getElementById('prod-price').value = p.precio || 0;
       document.getElementById('prod-qty').value = p.cantidad;
       document.getElementById('prod-img').value = p.imagen || '';
       document.getElementById('modal').classList.remove('hidden');
@@ -437,6 +482,7 @@
         item: document.getElementById('prod-item').value.trim(),
         color: document.getElementById('prod-color').value.trim(),
         talla: document.getElementById('prod-talla').value.trim(),
+        precio: Number(document.getElementById('prod-price').value) || 0,
         cantidad: Number(document.getElementById('prod-qty').value),
         imagen: document.getElementById('prod-img').value.trim(),
         mode: 'add'
