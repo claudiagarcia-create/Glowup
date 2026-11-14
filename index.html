@@ -120,9 +120,33 @@
       <span class="ml-3 text-sm font-semibold text-purple-700">Sincronizando inventario Glow Up...</span>
     </div>
 
-    <!-- Contenedor Agrupado por Modelo (Móvil y Escritorio) -->
+    <!-- Contenedor Principal de Resultados -->
     <div id="results-wrapper" class="hidden">
-      <div id="grouped-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      <!-- Vista 1: Agrupada por Modelo (cuando está en "Todas") -->
+      <div id="grouped-view" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+      <!-- Vista 2: Individual Original (cuando se filtra una categoría específica) -->
+      <div id="individual-view" class="hidden">
+        <!-- Móvil: Tarjetas individuales -->
+        <div id="mobile-individual-cards" class="md:hidden space-y-3"></div>
+        <!-- Escritorio: Tabla individual -->
+        <div class="hidden md:block bg-white rounded-2xl border border-purple-100 shadow-sm overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-gradient-to-r from-teal-50/80 to-purple-50/80 border-b border-purple-100 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th class="py-3.5 px-4 w-16">Foto</th>
+                <th class="py-3.5 px-4">Ítem</th>
+                <th class="py-3.5 px-4">Precio</th>
+                <th class="py-3.5 px-4">Color</th>
+                <th class="py-3.5 px-4">Talla</th>
+                <th class="py-3.5 px-4 text-center">Cantidad</th>
+                <th class="py-3.5 px-4 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-body" class="divide-y divide-slate-100 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -197,10 +221,55 @@
 
     let inventory = [];
     let selectedCategory = '';
-    // Guarda qué color está seleccionado dentro de cada grupo de ítem
     let selectedColorByGroup = {};
 
     window.onload = loadData;
+
+    // Convierte el nombre del color en un círculo visual real (swatch)
+    function getColorSwatchStyle(colorName) {
+      const c = (colorName || '').toLowerCase().trim();
+      const map = {
+        'negro': '#18181b',
+        'blanco': '#ffffff',
+        'azul': '#2563eb',
+        'azul claro': '#7dd3fc',
+        'celeste': '#7dd3fc',
+        'azul marino': '#1e3a8a',
+        'marron': '#78350f',
+        'marrón': '#78350f',
+        'cafe': '#78350f',
+        'café': '#78350f',
+        'verde oliva': '#556b2f',
+        'oliva': '#556b2f',
+        'verde': '#16a34a',
+        'aquamarine': '#2dd4bf',
+        'aguamarina': '#2dd4bf',
+        'turquesa': '#14b8a6',
+        'rojo': '#dc2626',
+        'vino': '#881337',
+        'rosa': '#f472b6',
+        'rosado': '#f472b6',
+        'fucsia': '#d946ef',
+        'morado': '#7e22ce',
+        'lila': '#c084fc',
+        'lavanda': '#d8b4fe',
+        'gris': '#9ca3af',
+        'beige': '#e7d5b8',
+        'nude': '#e5c1a1',
+        'amarillo': '#facc15',
+        'naranja': '#f97316',
+        'blanco/negro': 'linear-gradient(135deg, #ffffff 50%, #18181b 50%)',
+        'puntos': 'radial-gradient(#18181b 28%, #f1f5f9 32%)',
+        'colores varios': 'conic-gradient(#14b8a6, #a855f7, #f43f5e, #facc15, #14b8a6)'
+      };
+      return map[c] || '#cbd5e1';
+    }
+
+    function renderColorDot(colorName, isOnDark = false) {
+      const bg = getColorSwatchStyle(colorName);
+      const borderClass = isOnDark ? 'border-white/80' : 'border-slate-300';
+      return `<span class="inline-block w-3 h-3 rounded-full border ${borderClass} shrink-0 shadow-2xs" style="background: ${bg};"></span>`;
+    }
 
     function setLoading(isLoading) {
       document.getElementById('loading').classList.toggle('hidden', !isLoading);
@@ -215,7 +284,7 @@
         if (json.status === 'ok') {
           inventory = json.data || [];
           updateFilters();
-          renderGrouped();
+          renderResults();
         } else {
           alert('Error: ' + json.message);
         }
@@ -236,7 +305,7 @@
         if (json.status === 'ok') {
           inventory = json.data || [];
           updateFilters();
-          renderGrouped();
+          renderResults();
         } else {
           alert('Error al guardar: ' + json.message);
         }
@@ -253,7 +322,7 @@
 
     function handleFilterChange() {
       updateClearButtonVisibility();
-      renderGrouped();
+      renderResults();
     }
 
     function updateClearButtonVisibility() {
@@ -277,14 +346,13 @@
       document.getElementById('filter-status').value = '';
       renderCategoryTabs();
       updateClearButtonVisibility();
-      renderGrouped();
+      renderResults();
     }
 
     function renderCategoryTabs() {
       const cats = [...new Set(inventory.map(i => i.categoria))].sort();
       const container = document.getElementById('category-tabs');
       
-      // Contamos modelos únicos por categoría para que el número sea claro
       const uniqueItemsAll = new Set(inventory.map(i => `${i.categoria}::${i.item}`)).size;
       const allActive = selectedCategory === '' 
         ? 'glow-gradient text-white shadow-sm border-transparent' 
@@ -293,11 +361,11 @@
       let html = `<button onclick="selectCategory('')" class="px-3 py-1.5 rounded-full text-xs font-bold transition ${allActive}">Todas (${uniqueItemsAll})</button>`;
       
       cats.forEach(c => {
-        const countModels = new Set(inventory.filter(i => i.categoria === c).map(i => i.item)).size;
+        const countVariants = inventory.filter(i => i.categoria === c).length;
         const active = selectedCategory === c 
           ? 'glow-gradient text-white shadow-sm border-transparent' 
           : 'bg-white text-slate-600 border border-teal-200/80 hover:border-purple-300 hover:bg-purple-50/40';
-        html += `<button onclick="selectCategory('${c.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-full text-xs font-bold transition ${active}">${c} (${countModels})</button>`;
+        html += `<button onclick="selectCategory('${c.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-full text-xs font-bold transition ${active}">${c} (${countVariants})</button>`;
       });
       
       container.innerHTML = html;
@@ -312,7 +380,7 @@
       let optionsHtml = `<option value="">Precio: Todos</option>`;
       for (let min = 0; min < topLimit; min += 10) {
         const max = min + 10;
-        optionsHtml += `<option value="${min}-${max}">$${min} a $${max}</option>`;
+        optionsHtml += `<option value="${min}-${max}">$${min} a$${max}</option>`;
       }
       el.innerHTML = optionsHtml;
       el.value = current;
@@ -361,17 +429,16 @@
 
     function selectGroupColor(groupKey, color) {
       selectedColorByGroup[groupKey] = color;
-      renderGrouped();
+      renderResults();
     }
 
-    function renderGrouped() {
+    function renderResults() {
       const search = document.getElementById('search-input').value.toLowerCase();
       const fPrice = document.getElementById('filter-price').value;
       const fColor = document.getElementById('filter-color').value;
       const fTalla = document.getElementById('filter-talla').value;
       const fStatus = document.getElementById('filter-status').value;
 
-      // 1. Filtramos primero las variantes que cumplen los filtros activos
       const filtered = inventory.filter(p => {
         const priceNum = Number(p.precio) || 0;
         const matchSearch = p.item.toLowerCase().includes(search) || p.categoria.toLowerCase().includes(search);
@@ -395,16 +462,33 @@
 
       document.getElementById('stat-total').textContent = filtered.reduce((acc, i) => acc + i.cantidad, 0);
 
-      const container = document.getElementById('grouped-cards');
+      const groupedEl = document.getElementById('grouped-view');
+      const individualEl = document.getElementById('individual-view');
+
+      // Si hay una categoría seleccionada, mostramos la vista individual original
+      if (selectedCategory !== '') {
+        groupedEl.classList.add('hidden');
+        individualEl.classList.remove('hidden');
+        renderIndividualView(filtered);
+      } else {
+        // En "Todas", mostramos la vista agrupada por modelo
+        individualEl.classList.add('hidden');
+        groupedEl.classList.remove('hidden');
+        renderGroupedView(filtered);
+      }
+    }
+
+    // VISTA 1: Agrupada por Modelo (para "Todas")
+    function renderGroupedView(filtered) {
+      const container = document.getElementById('grouped-view');
       if (filtered.length === 0) {
         container.innerHTML = `<div class="col-span-full bg-white rounded-2xl border border-purple-100 p-10 text-center text-sm text-slate-500">No se encontraron prendas con esos filtros.</div>`;
         return;
       }
 
-      // 2. Agrupamos por Categoría + Ítem
       const groupsMap = new Map();
       filtered.forEach(p => {
-        const key = `${p.categoria}|||${p.item}`;
+        const key = `${p.categoria}\vert{}\vert{}\vert{}${p.item}`;
         if (!groupsMap.has(key)) {
           groupsMap.set(key, {
             key: key,
@@ -421,35 +505,30 @@
       container.innerHTML = Array.from(groupsMap.values()).map(group => {
         const colors = [...new Set(group.variants.map(v => v.color))];
         
-        // Determinamos cuál color mostrar activo en esta tarjeta
         let activeColor = selectedColorByGroup[group.key];
         if (!activeColor || !colors.includes(activeColor)) {
           activeColor = colors[0];
           selectedColorByGroup[group.key] = activeColor;
         }
 
-        // Variantes del color seleccionado (ordenadas por talla)
         const colorVariants = group.variants
           .filter(v => v.color === activeColor)
           .sort((a, b) => (sizeOrder[a.talla] || 99) - (sizeOrder[b.talla] || 99));
 
-        // Foto principal: busca la primera foto disponible en ese color, o en cualquier color del grupo
         const activeImg = (colorVariants.find(v => v.imagen) || group.variants.find(v => v.imagen) || {}).imagen || '';
 
-        // Precio: muestra el precio del color activo (o rango si difieren)
         const prices = [...new Set(colorVariants.map(v => Number(v.precio) || 0))];
         const priceDisplay = prices.length === 1 
           ? formatPrice(prices[0]) 
-          : `${formatPrice(Math.min(...prices))} - ${formatPrice(Math.max(...prices))}`;
+          : `${formatPrice(Math.min(...prices))} -${formatPrice(Math.max(...prices))}`;
 
-        // Total de unidades en todo el modelo (todos los colores)
         const totalModelUnits = group.variants.reduce((sum, v) => sum + v.cantidad, 0);
 
         const imgHtml = activeImg
-          ? `<img src="${activeImg}" onclick="showImage('${activeImg}', '${group.item} · ${activeColor}')" class="w-20 h-20 shrink-0 object-cover rounded-2xl border border-teal-100 cursor-pointer hover:scale-105 transition shadow-xs" onerror="this.src='https://placehold.co/120x120/f0fdfa/0d9488?text=Sin+Foto'">`
+          ? `<img src="${activeImg}" onclick="showImage('${activeImg}', '${group.item} ·${activeColor}')" class="w-20 h-20 shrink-0 object-cover rounded-2xl border border-teal-100 cursor-pointer hover:scale-105 transition shadow-xs" onerror="this.src='https://placehold.co/120x120/f0fdfa/0d9488?text=Sin+Foto'">`
           : `<div class="w-20 h-20 shrink-0 rounded-2xl bg-gradient-to-br from-teal-50 to-purple-50 border border-purple-100 flex items-center justify-center text-purple-300 text-xs font-semibold text-center leading-tight">Sin<br>foto</div>`;
 
-        // Botones de colores disponibles
+        // Botones de colores con círculo visual + nombre del color + cantidad
         const colorPillsHtml = colors.map(c => {
           const isSelected = c === activeColor;
           const colorStock = group.variants.filter(v => v.color === c).reduce((s, v) => s + v.cantidad, 0);
@@ -463,19 +542,18 @@
               onclick="selectGroupColor('${escapedKey}', '${escapedColor}')" 
               class="px-2.5 py-1 rounded-xl text-xs font-bold border transition flex items-center gap-1.5 ${pillStyle}"
             >
+              ${renderColorDot(c, isSelected)}
               <span>${c}</span>
               <span class="text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-white/25 text-white' : 'bg-slate-200/80 text-slate-600'}">${colorStock}</span>
             </button>
           `;
         }).join('');
 
-        // Filas compactas de tallas para el color activo
         const sizesRowsHtml = colorVariants.map(v => {
           let qtyBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-100 text-teal-800">${v.cantidad} unid.</span>`;
           if (v.cantidad === 0) qtyBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700">Agotado</span>`;
           else if (v.cantidad <= 5) qtyBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800">${v.cantidad} unid.</span>`;
 
-          // Si una talla específica tiene precio distinto al resto, lo mostramos al lado
           const variantPriceTag = prices.length > 1 
             ? `<span class="text-xs font-bold text-teal-700 ml-1.5">(${formatPrice(v.precio)})</span>` 
             : '';
@@ -506,7 +584,6 @@
         return `
           <div class="bg-white rounded-2xl border border-purple-100 p-4 shadow-xs flex flex-col justify-between">
             <div>
-              <!-- Cabecera del Modelo: Foto + Nombre + Precio + Total modelo -->
               <div class="flex gap-3.5 items-start">
                 ${imgHtml}
                 <div class="flex-1 min-w-0">
@@ -520,7 +597,6 @@
                     Stock total del modelo: <strong class="text-purple-700">${totalModelUnits} unid.</strong>
                   </div>
 
-                  <!-- Selector de Colores -->
                   <div class="mt-2.5">
                     <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Colores disponibles</div>
                     <div class="flex flex-wrap gap-1.5">
@@ -530,10 +606,9 @@
                 </div>
               </div>
 
-              <!-- Lista de Tallas del Color seleccionado -->
               <div class="mt-3.5 pt-3 border-t border-slate-100">
                 <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 px-1">
-                  <span>Tallas en ${activeColor}</span>
+                  <span class="flex items-center gap-1.5">Tallas en ${renderColorDot(activeColor)}${activeColor}</span>
                   <span>Stock / Acciones</span>
                 </div>
                 <div class="space-y-1.5">
@@ -546,70 +621,40 @@
       }).join('');
     }
 
-    async function changeStock(id, delta) {
-      const item = inventory.find(i => i.id === id);
-      if (item) {
-        item.cantidad = Math.max(0, item.cantidad + delta);
-        renderGrouped();
+    // VISTA 2: Individual Original (cuando se filtra una categoría específica)
+    function renderIndividualView(filtered) {
+      const tbody = document.getElementById('inventory-body');
+      const mobileCards = document.getElementById('mobile-individual-cards');
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-slate-500">No se encontraron prendas con esos filtros.</td></tr>`;
+        mobileCards.innerHTML = `<div class="bg-white rounded-2xl border border-purple-100 p-8 text-center text-sm text-slate-500">No se encontraron prendas con esos filtros.</div>`;
+        return;
       }
-      await sendAction({ action: 'updateStock', id: id, delta: delta });
-    }
 
-    function openModal() {
-      document.getElementById('modal-title').textContent = 'Agregar Producto';
-      document.getElementById('product-form').reset();
-      document.getElementById('prod-id').value = '';
-      if (selectedCategory) document.getElementById('prod-cat').value = selectedCategory;
-      document.getElementById('modal').classList.remove('hidden');
-    }
+      // Escritorio
+      tbody.innerHTML = filtered.map(p => {
+        let badge = `<span class="px-3 py-0.5 rounded-full text-xs font-bold bg-teal-100 text-teal-800">${p.cantidad}</span>`;
+        if (p.cantidad === 0) badge = `<span class="px-3 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700">Agotado (0)</span>`;
+        else if (p.cantidad <= 5) badge = `<span class="px-3 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800">${p.cantidad} unid.</span>`;
 
-    function editProduct(p) {
-      document.getElementById('modal-title').textContent = 'Editar Variante';
-      document.getElementById('prod-id').value = p.id;
-      document.getElementById('prod-cat').value = p.categoria;
-      document.getElementById('prod-item').value = p.item;
-      document.getElementById('prod-color').value = p.color;
-      document.getElementById('prod-talla').value = p.talla;
-      document.getElementById('prod-price').value = p.precio || 0;
-      document.getElementById('prod-qty').value = p.cantidad;
-      document.getElementById('prod-img').value = p.imagen || '';
-      document.getElementById('modal').classList.remove('hidden');
-    }
+        const imgHtml = p.imagen 
+          ? `<img src="${p.imagen}" onclick="showImage('${p.imagen}', '${p.item} ·${p.color}')" class="w-11 h-11 object-cover rounded-xl border border-teal-100 cursor-pointer hover:scale-105 transition shadow-2xs" onerror="this.src='https://placehold.co/80x80/f0fdfa/0d9488?text=Sin+Foto'">`
+          : `<div class="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-50 to-purple-50 border border-purple-100 flex items-center justify-center text-purple-300 text-[10px] font-semibold text-center leading-tight">Sin<br>foto</div>`;
 
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
-    }
-
-    async function handleSave(e) {
-      e.preventDefault();
-      const btn = document.getElementById('save-btn');
-      btn.disabled = true;
-      btn.textContent = 'Guardando...';
-
-      const product = {
-        id: document.getElementById('prod-id').value,
-        categoria: document.getElementById('prod-cat').value.trim(),
-        item: document.getElementById('prod-item').value.trim(),
-        color: document.getElementById('prod-color').value.trim(),
-        talla: document.getElementById('prod-talla').value.trim(),
-        precio: Number(document.getElementById('prod-price').value) || 0,
-        cantidad: Number(document.getElementById('prod-qty').value),
-        imagen: document.getElementById('prod-img').value.trim(),
-        mode: 'add'
-      };
-
-      await sendAction({ action: 'save', product: product });
-      closeModal();
-      btn.disabled = false;
-      btn.textContent = 'Guardar';
-    }
-
-    async function removeProduct(id) {
-      if (!confirm('¿Eliminar esta variante del inventario?')) return;
-      setLoading(true);
-      await sendAction({ action: 'delete', id: id });
-      setLoading(false);
-    }
-  </script>
-</body>
-</html>
+        return `
+          <tr class="hover:bg-purple-50/30 transition">
+            <td class="py-2.5 px-4">${imgHtml}</td>
+            <td class="py-3 px-4 font-bold text-slate-800">${p.item}</td>
+            <td class="py-3 px-4 font-bold text-teal-700">${formatPrice(p.precio)}</td>
+            <td class="py-3 px-4 text-slate-700 font-medium">
+              <span class="inline-flex items-center gap-1.5">
+                ${renderColorDot(p.color)}
+                <span>${p.color}</span>
+              </span>
+            </td>
+            <td class="py-3 px-4">
+              <span class="px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200/70 rounded-lg text-xs font-bold">${p.talla}</span>
+            </td>
+            <td class="py-3 px-4">
+              <div class="flex items-
