@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Glow Up · Control de Inventario</title>
+  <title>Glow Up · Control de Inventario y Ventas</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -29,9 +29,9 @@
 <body class="text-slate-800 p-3.5 md:p-6">
 
   <div class="max-w-5xl mx-auto">
-    <!-- Cabecera con Logo y Total de Unidades -->
-    <div class="bg-white/90 backdrop-blur-md p-4 md:p-5 rounded-2xl border border-purple-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3.5 mb-5">
-      <div class="flex items-center justify-between">
+    <!-- Cabecera Principal -->
+    <div class="bg-white/90 backdrop-blur-md p-4 md:p-5 rounded-2xl border border-purple-100 shadow-sm flex flex-col gap-3.5 mb-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3.5">
         <div class="flex items-center gap-3">
           <img 
             src="https://i.ibb.co/93V1rXQD/logo.png" 
@@ -41,101 +41,49 @@
           >
           <div>
             <h1 class="text-lg md:text-2xl font-extrabold bg-gradient-to-r from-teal-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
-              Glow Up · Inventario
+              Glow Up · Gestión
             </h1>
-            <p class="text-xs md:text-sm text-slate-500 font-medium">Catálogo visual sincronizado</p>
+            <p class="text-xs md:text-sm text-slate-500 font-medium">Catálogo visual e histórico de ventas</p>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between md:justify-end gap-2.5 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+          <!-- Indicador dinámico según módulo -->
+          <div class="glow-gradient-soft border border-purple-200/70 px-3.5 py-1.5 rounded-xl flex items-center gap-2.5">
+            <div>
+              <div id="header-stat-label" class="text-[10px] font-bold uppercase tracking-wider text-purple-700">Total Unidades</div>
+              <div id="stat-total" class="text-xl md:text-2xl font-extrabold text-teal-700 leading-none mt-0.5">0</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="loadData()" title="Actualizar datos" class="px-3 py-2.5 bg-white border border-teal-200 rounded-xl text-sm font-semibold text-teal-700 hover:bg-teal-50 transition flex items-center gap-1.5 shadow-2xs">
+              <span>↻</span> <span class="hidden sm:inline">Actualizar</span>
+            </button>
+            <button id="btn-primary-action" onclick="openModal()" class="px-4 py-2.5 glow-gradient text-white rounded-xl text-sm font-semibold hover:opacity-95 transition shadow-sm">
+              + Agregar
+            </button>
           </div>
         </div>
       </div>
 
-      <div class="flex items-center justify-between md:justify-end gap-2.5 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
-        <!-- Tarjeta única: Total Unidades -->
-        <div class="glow-gradient-soft border border-purple-200/70 px-3.5 py-1.5 rounded-xl flex items-center gap-2.5">
-          <div>
-            <div class="text-[10px] font-bold uppercase tracking-wider text-purple-700">Total Unidades</div>
-            <div id="stat-total" class="text-xl md:text-2xl font-extrabold text-teal-700 leading-none mt-0.5">0</div>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <button onclick="loadData()" title="Actualizar datos" class="px-3 py-2.5 bg-white border border-teal-200 rounded-xl text-sm font-semibold text-teal-700 hover:bg-teal-50 transition flex items-center gap-1.5 shadow-2xs">
-            <span>↻</span> <span class="hidden sm:inline">Actualizar</span>
-          </button>
-          <button onclick="openModal()" class="px-4 py-2.5 glow-gradient text-white rounded-xl text-sm font-semibold hover:opacity-95 transition shadow-sm">
-            + Agregar
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pestañas rápidas por Categoría + Selector de Vista -->
-    <div class="mb-4">
-      <div class="flex items-center justify-between gap-2 mb-2 px-1">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Categorías</span>
-        
-        <!-- Interruptor Vista General vs Vista Detallada -->
-        <div class="inline-flex items-center bg-white/90 p-1 rounded-xl border border-purple-100 shadow-2xs" role="group" aria-label="Modo de vista">
-          <button 
-            id="btn-view-grouped" 
-            onclick="setViewMode('grouped')" 
-            class="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 glow-gradient text-white shadow-2xs"
-            title="Vista general agrupada por modelo"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-            <span>General</span>
-          </button>
-          <button 
-            id="btn-view-detailed" 
-            onclick="setViewMode('detailed')" 
-            class="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-purple-700"
-            title="Vista detallada en columnas"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1.2" fill="currentColor"/><circle cx="4" cy="12" r="1.2" fill="currentColor"/><circle cx="4" cy="18" r="1.2" fill="currentColor"/></svg>
-            <span>Detallada</span>
-          </button>
-        </div>
-      </div>
-
-      <div id="category-tabs" class="flex flex-wrap gap-1.5 md:gap-2"></div>
-    </div>
-
-    <!-- Barra de filtros secundarios + Rango de Precio + Botón Limpiar -->
-    <div class="bg-white/90 backdrop-blur-md p-3 md:p-3.5 rounded-2xl border border-teal-100 shadow-sm mb-5">
-      <div class="grid grid-cols-2 lg:grid-cols-12 gap-2 items-center">
-        <div class="col-span-2 lg:col-span-3">
-          <input type="text" id="search-input" oninput="handleFilterChange()" placeholder="Buscar modelo o prenda..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 bg-slate-50/50">
-        </div>
-        <div class="col-span-1 lg:col-span-2">
-          <select id="filter-price" onchange="handleFilterChange()" class="w-full px-2.5 py-2 border border-slate-200 rounded-xl text-xs md:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-400">
-            <option value="">Precio: Todos</option>
-          </select>
-        </div>
-        <div class="col-span-1 lg:col-span-2">
-          <select id="filter-color" onchange="handleFilterChange()" class="w-full px-2.5 py-2 border border-slate-200 rounded-xl text-xs md:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400">
-            <option value="">Color: Todos</option>
-          </select>
-        </div>
-        <div class="col-span-1 lg:col-span-2">
-          <select id="filter-talla" onchange="handleFilterChange()" class="w-full px-2.5 py-2 border border-slate-200 rounded-xl text-xs md:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400">
-            <option value="">Talla: Todas</option>
-          </select>
-        </div>
-        <div class="col-span-1 lg:col-span-3 flex items-center gap-1.5">
-          <select id="filter-status" onchange="handleFilterChange()" class="w-full px-2.5 py-2 border border-slate-200 rounded-xl text-xs md:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400">
-            <option value="">Stock: Todos</option>
-            <option value="ok">Disponible (> 0)</option>
-            <option value="low">Pocas (1-5)</option>
-            <option value="out">Agotado (0)</option>
-          </select>
-          <button 
-            id="clear-filters-btn" 
-            onclick="clearAllFilters()" 
-            class="hidden shrink-0 px-2.5 py-2 rounded-xl text-xs font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200 transition flex items-center gap-1"
-            title="Quitar todos los filtros"
-          >
-            ✕ <span class="hidden sm:inline">Limpiar</span>
-          </button>
-        </div>
+      <!-- Navegación de Módulos: Inventario vs Histórico de Ventas -->
+      <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+        <button 
+          id="nav-inventory" 
+          onclick="switchModule('inventory')" 
+          class="flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition flex items-center justify-center gap-2 glow-gradient text-white shadow-2xs"
+        >
+          <span>Inventario</span>
+        </button>
+        <button 
+          id="nav-sales" 
+          onclick="switchModule('sales')" 
+          class="flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition flex items-center justify-center gap-2 bg-slate-50 text-slate-600 hover:bg-purple-50 hover:text-purple-700 border border-slate-200/80"
+        >
+          <span>Histórico de Ventas</span>
+          <span id="nav-sales-badge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-purple-100 text-purple-700 font-extrabold">0</span>
+        </button>
       </div>
     </div>
 
@@ -145,8 +93,79 @@
       <span class="ml-3 text-sm font-semibold text-purple-700">Sincronizando inventario Glow Up...</span>
     </div>
 
-    <!-- Contenedor Principal de Resultados -->
-    <div id="results-wrapper" class="hidden">
+    <!-- ==================== MÓDULO 1: INVENTARIO ==================== -->
+    <div id="module-inventory" class="hidden">
+      <!-- Pestañas rápidas por Categoría + Selector de Vista -->
+      <div class="mb-4">
+        <div class="flex items-center justify-between gap-2 mb-2 px-1">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Categorías</span>
+          
+          <!-- Interruptor Vista General vs Vista Detallada -->
+          <div class="inline-flex items-center bg-white/90 p-1 rounded-xl border border-purple-100 shadow-2xs" role="group" aria-label="Modo de vista">
+            <button 
+              id="btn-view-grouped" 
+              onclick="setViewMode('grouped')" 
+              class="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 glow-gradient text-white shadow-2xs"
+              title="Vista general agrupada por modelo"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+              <span>General</span>
+            </button>
+            <button 
+              id="btn-view-detailed" 
+              onclick="setViewMode('detailed')" 
+              class="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-purple-700"
+              title="Vista detallada en columnas"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1.2" fill="currentColor"/><circle cx="4" cy="12" r="1.2" fill="currentColor"/><circle cx="4" cy="18" r="1.2" fill="currentColor"/></svg>
+              <span>Detallada</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="category-tabs" class="flex flex-wrap gap-1.5 md:gap-2"></div>
+      </div>
+
+      <!-- Barra de filtros secundarios + Rango de Precio + Botón Limpiar -->
+      <div class="bg-white/90 backdrop-blur-md p-3 md:p-3.5 rounded-2xl border border-teal-100 shadow-sm mb-5">
+        <div class="grid grid-cols-2 lg:grid-cols-12 gap-2 items-center">
+          <div class="col-span-2 lg:col-span-3">
+            <input type="text" id="search-input" oninput="handleFilterChange()" placeholder="Buscar modelo o prenda..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 bg-slate-50/50">
+          </div>
+          <div class="col-span-1 lg:col-span-2">
+            <select id="filter-price" onchange="handleFilterChange()" class="w-full px-2.5 py-2 border border-slate-200 rounded-xl text-xs md:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-400">
+              <option value="">Precio: Todos</option>
+            </select>
+          </div>
+          <div class="col-span-1 lg:col-span-2">
+            <select id="filter-color" onchange="handleFilterChange()" class="w-full px-2.5 py-2 border border-slate-200 rounded-xl text-xs md:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400">
+              <option value="">Color: Todos</option>
+            </select>
+          </div>
+          <div class="col-span-1 lg:col-span-2">
+            <select id="filter-talla" onchange="handleFilterChange()" class="w-full px-2.5 py-2 border border-slate-200 rounded-xl text-xs md:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400">
+              <option value="">Talla: Todas</option>
+            </select>
+          </div>
+          <div class="col-span-1 lg:col-span-3 flex items-center gap-1.5">
+            <select id="filter-status" onchange="handleFilterChange()" class="w-full px-2.5 py-2 border border-slate-200 rounded-xl text-xs md:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400">
+              <option value="">Stock: Todos</option>
+              <option value="ok">Disponible (> 0)</option>
+              <option value="low">Pocas (1-5)</option>
+              <option value="out">Agotado (0)</option>
+            </select>
+            <button 
+              id="clear-filters-btn" 
+              onclick="clearAllFilters()" 
+              class="hidden shrink-0 px-2.5 py-2 rounded-xl text-xs font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200 transition flex items-center gap-1"
+              title="Quitar todos los filtros"
+            >
+              ✕ <span class="hidden sm:inline">Limpiar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Vista 1: Agrupada por Modelo (Vista General) -->
       <div id="grouped-view" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
 
@@ -168,9 +187,132 @@
         </table>
       </div>
     </div>
+
+    <!-- ==================== MÓDULO 2: HISTÓRICO DE VENTAS ==================== -->
+    <div id="module-sales" class="hidden space-y-5">
+      <!-- Tarjetas de Resumen Financiero y Stock Agotado -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div class="bg-white/95 rounded-2xl border border-teal-200/80 p-4 shadow-xs">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-teal-700">Ganancias Totales</div>
+          <div id="sales-total-revenue" class="text-2xl md:text-3xl font-extrabold text-teal-700 mt-1">$0.00</div>
+          <div class="text-xs text-slate-500 mt-1">Suma de prendas vendidas</div>
+        </div>
+
+        <div class="bg-white/95 rounded-2xl border border-purple-200/80 p-4 shadow-xs">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-purple-700">Prendas Vendidas</div>
+          <div id="sales-total-units" class="text-2xl md:text-3xl font-extrabold text-purple-700 mt-1">0</div>
+          <div class="text-xs text-slate-500 mt-1">Unidades registradas</div>
+        </div>
+
+        <div class="bg-white/95 rounded-2xl border border-rose-200/80 p-4 shadow-xs">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-rose-600">No Disponibles (Agotadas)</div>
+          <div id="sales-out-of-stock-count" class="text-2xl md:text-3xl font-extrabold text-rose-600 mt-1">0</div>
+          <div class="text-xs text-slate-500 mt-1">Variantes en stock 0</div>
+        </div>
+      </div>
+
+      <!-- Sub-pestañas dentro de Histórico: Ventas Realizadas vs Prendas No Disponibles -->
+      <div class="bg-white/90 backdrop-blur-md p-3 md:p-3.5 rounded-2xl border border-purple-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="inline-flex bg-slate-100 p-1 rounded-xl self-start">
+          <button 
+            id="subtab-sales-list" 
+            onclick="switchSalesSubtab('list')" 
+            class="px-3 py-1.5 rounded-lg text-xs font-bold transition glow-gradient text-white shadow-2xs"
+          >
+            Ventas Realizadas
+          </button>
+          <button 
+            id="subtab-sales-out" 
+            onclick="switchSalesSubtab('out')" 
+            class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-purple-700 flex items-center gap-1.5"
+          >
+            <span>Agotadas (No Disponibles)</span>
+            <span id="out-pill-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-100 text-rose-700 font-extrabold">0</span>
+          </button>
+        </div>
+
+        <!-- Filtros del Histórico -->
+        <div id="sales-filters-bar" class="grid grid-cols-2 sm:flex items-center gap-2 flex-1 md:justify-end">
+          <input 
+            type="text" 
+            id="sales-search" 
+            oninput="renderSalesModule()" 
+            placeholder="Buscar prenda vendida..." 
+            class="col-span-2 sm:w-52 px-3 py-1.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          >
+          <select 
+            id="sales-month-filter" 
+            onchange="renderSalesModule()" 
+            class="px-2.5 py-1.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+          >
+            <option value="">Mes: Todos</option>
+          </select>
+          <select 
+            id="sales-cat-filter" 
+            onchange="renderSalesModule()" 
+            class="px-2.5 py-1.5 border border-slate-200 rounded-xl text-xs md:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+          >
+            <option value="">Categoría: Todas</option>
+          </select>
+          <button 
+            onclick="clearSalesHistory()" 
+            title="Vaciar historial local" 
+            class="col-span-2 sm:col-span-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition"
+          >
+            Limpiar historial
+          </button>
+        </div>
+      </div>
+
+      <!-- Vista A: Tabla de Histórico de Ventas -->
+      <div id="sales-list-container" class="bg-white rounded-2xl border border-purple-100 shadow-sm overflow-x-auto">
+        <table class="w-full min-w-[720px] text-left border-collapse">
+          <thead>
+            <tr class="bg-gradient-to-r from-teal-50/80 to-purple-50/80 border-b border-purple-100 text-xs font-bold text-slate-600 uppercase tracking-wider">
+              <th class="py-3.5 px-4">Fecha</th>
+              <th class="py-3.5 px-4 w-14">Foto</th>
+              <th class="py-3.5 px-4">Prenda</th>
+              <th class="py-3.5 px-4">Color / Talla</th>
+              <th class="py-3.5 px-4 text-center">Cant.</th>
+              <th class="py-3.5 px-4 text-right">Precio Unit.</th>
+              <th class="py-3.5 px-4 text-right">Ganancia</th>
+              <th class="py-3.5 px-4 text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="sales-body" class="divide-y divide-slate-100 text-sm"></tbody>
+          <tfoot>
+            <tr class="bg-gradient-to-r from-teal-50 to-purple-50 border-t-2 border-purple-200 font-extrabold text-sm">
+              <td colspan="4" class="py-3.5 px-4 text-slate-700 uppercase text-xs tracking-wider">Total Acumulado</td>
+              <td id="sales-foot-qty" class="py-3.5 px-4 text-center text-purple-700">0</td>
+              <td class="py-3.5 px-4"></td>
+              <td id="sales-foot-total" class="py-3.5 px-4 text-right text-teal-700 text-base">$0.00</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Vista B: Prendas Agotadas (No disponibles actualmente en stock) -->
+      <div id="sales-out-container" class="hidden bg-white rounded-2xl border border-rose-100 shadow-sm overflow-x-auto">
+        <table class="w-full min-w-[680px] text-left border-collapse">
+          <thead>
+            <tr class="bg-rose-50/70 border-b border-rose-100 text-xs font-bold text-slate-600 uppercase tracking-wider">
+              <th class="py-3.5 px-4 w-16">Foto</th>
+              <th class="py-3.5 px-4">Prenda Agotada</th>
+              <th class="py-3.5 px-4">Categoría</th>
+              <th class="py-3.5 px-4">Color / Talla</th>
+              <th class="py-3.5 px-4 text-right">Precio</th>
+              <th class="py-3.5 px-4 text-center">Vendidas</th>
+              <th class="py-3.5 px-4 text-right">Reponer Stock</th>
+            </tr>
+          </thead>
+          <tbody id="out-of-stock-body" class="divide-y divide-slate-100 text-sm"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
-  <!-- Modal Agregar / Editar -->
+  <!-- Modal Agregar / Editar Producto (Inventario) -->
   <div id="modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-purple-100 max-h-[92vh] overflow-y-auto">
       <h2 id="modal-title" class="text-lg font-extrabold text-slate-900 mb-4">Agregar Producto</h2>
@@ -225,6 +367,49 @@
     </div>
   </div>
 
+  <!-- Modal Registrar Venta Manual -->
+  <div id="sale-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-purple-100 max-h-[92vh] overflow-y-auto">
+      <h2 class="text-lg font-extrabold text-slate-900 mb-1">Registrar Venta</h2>
+      <p class="text-xs text-slate-500 mb-4">Descuenta stock de tu hoja y suma la ganancia en el historial del sitio.</p>
+      
+      <form id="sale-form" onsubmit="handleSaveSale(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Prenda del Inventario</label>
+          <select id="sale-product-select" onchange="fillSaleFromProduct()" required class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-purple-400 focus:outline-none">
+            <option value="">Selecciona una prenda...</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Cantidad Vendida</label>
+            <input type="number" id="sale-qty" min="1" required value="1" oninput="updateSalePreviewTotal()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-teal-400 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Precio Venta ($)</label>
+            <input type="number" id="sale-price" min="0" step="0.01" required placeholder="0.00" oninput="updateSalePreviewTotal()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-purple-400 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nota / Cliente (Opcional)</label>
+          <input type="text" id="sale-note" placeholder="Ej. Venta Instagram / Pago Móvil" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-teal-400 focus:outline-none">
+        </div>
+
+        <div class="p-3 rounded-xl glow-gradient-soft border border-purple-200/70 flex items-center justify-between">
+          <span class="text-xs font-bold text-purple-800 uppercase">Total Ganancia:</span>
+          <span id="sale-preview-total" class="text-lg font-extrabold text-teal-700">$0.00</span>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeSaleModal()" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancelar</button>
+          <button type="submit" id="save-sale-btn" class="px-5 py-2 text-sm font-semibold glow-gradient text-white hover:opacity-95 rounded-xl">Registrar Venta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Modal Vista Previa de Foto -->
   <div id="img-modal" onclick="this.classList.add('hidden')" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4 z-50 cursor-pointer">
     <div class="bg-white p-3 rounded-2xl max-w-lg w-full shadow-2xl border border-purple-100" onclick="event.stopPropagation()">
@@ -238,13 +423,125 @@
 
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbyR4yMqNIjj_25Dv2tgylrxGBd3km1fzviXMB_T6u7eC6SaRPzR2YYjp1fdllSsVHnI/exec';
+    const LOCAL_SALES_KEY = 'glowup_sales_history_v1';
 
     let inventory = [];
+    let salesHistory = loadLocalSales();
     let selectedCategory = '';
     let selectedColorByGroup = {};
-    let viewMode = 'grouped'; // 'grouped' (General) | 'detailed' (Detallada en columnas)
+    let viewMode = 'grouped';
+    let currentModule = 'inventory'; // 'inventory' | 'sales'
+    let salesSubtab = 'list'; // 'list' | 'out'
 
     window.onload = loadData;
+
+    // Manejo de ventas exclusivamente en el navegador (localStorage)
+    function loadLocalSales() {
+      try {
+        const raw = localStorage.getItem(LOCAL_SALES_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveLocalSales() {
+      try {
+        localStorage.setItem(LOCAL_SALES_KEY, JSON.stringify(salesHistory));
+      } catch (e) {
+        console.warn('No se pudo guardar en localStorage:', e);
+      }
+    }
+
+    function addLocalSaleEntry(entry) {
+      salesHistory.unshift({
+        id: 'V-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+        fecha: new Date().toISOString(),
+        categoria: entry.categoria || '',
+        item: entry.item || '',
+        color: entry.color || '',
+        talla: entry.talla || '',
+        cantidad: Number(entry.cantidad) || 1,
+        precioUnitario: Number(entry.precioUnitario) || 0,
+        total: (Number(entry.cantidad) || 1) * (Number(entry.precioUnitario) || 0),
+        imagen: entry.imagen || '',
+        nota: entry.nota || ''
+      });
+      saveLocalSales();
+      updateSalesFilters();
+      renderSalesModule();
+    }
+
+    function switchModule(mod) {
+      currentModule = mod;
+      const navInv = document.getElementById('nav-inventory');
+      const navSales = document.getElementById('nav-sales');
+      const modInv = document.getElementById('module-inventory');
+      const modSales = document.getElementById('module-sales');
+      const btnPrimary = document.getElementById('btn-primary-action');
+      const statLabel = document.getElementById('header-stat-label');
+
+      const activeTab = ['glow-gradient', 'text-white', 'shadow-2xs'];
+      const inactiveTab = ['bg-slate-50', 'text-slate-600', 'hover:bg-purple-50', 'hover:text-purple-700', 'border', 'border-slate-200/80'];
+
+      if (mod === 'inventory') {
+        navInv.classList.add(...activeTab);
+        navInv.classList.remove(...inactiveTab);
+        navSales.classList.remove(...activeTab);
+        navSales.classList.add(...inactiveTab);
+
+        modInv.classList.remove('hidden');
+        modSales.classList.add('hidden');
+
+        btnPrimary.textContent = '+ Agregar';
+        btnPrimary.onclick = openModal;
+        statLabel.textContent = 'Total Unidades';
+        renderResults();
+      } else {
+        navSales.classList.add(...activeTab);
+        navSales.classList.remove(...inactiveTab);
+        navInv.classList.remove(...activeTab);
+        navInv.classList.add(...inactiveTab);
+
+        modInv.classList.add('hidden');
+        modSales.classList.remove('hidden');
+
+        btnPrimary.textContent = '+ Registrar Venta';
+        btnPrimary.onclick = openSaleModal;
+        statLabel.textContent = 'Ganancias Totales';
+        renderSalesModule();
+      }
+    }
+
+    function switchSalesSubtab(sub) {
+      salesSubtab = sub;
+      const btnList = document.getElementById('subtab-sales-list');
+      const btnOut = document.getElementById('subtab-sales-out');
+      const listContainer = document.getElementById('sales-list-container');
+      const outContainer = document.getElementById('sales-out-container');
+      const filtersBar = document.getElementById('sales-filters-bar');
+
+      const active = ['glow-gradient', 'text-white', 'shadow-2xs'];
+      const inactive = ['text-slate-600', 'hover:text-purple-700'];
+
+      if (sub === 'list') {
+        btnList.classList.add(...active);
+        btnList.classList.remove(...inactive);
+        btnOut.classList.remove(...active);
+        btnOut.classList.add(...inactive);
+        listContainer.classList.remove('hidden');
+        outContainer.classList.add('hidden');
+        filtersBar.classList.remove('hidden');
+      } else {
+        btnOut.classList.add(...active);
+        btnOut.classList.remove(...inactive);
+        btnList.classList.remove(...active);
+        btnList.classList.add(...inactive);
+        outContainer.classList.remove('hidden');
+        listContainer.classList.add('hidden');
+        filtersBar.classList.add('hidden');
+      }
+    }
 
     function updateViewToggleUI() {
       const btnGrouped = document.getElementById('btn-view-grouped');
@@ -318,7 +615,16 @@
 
     function setLoading(isLoading) {
       document.getElementById('loading').classList.toggle('hidden', !isLoading);
-      document.getElementById('results-wrapper').classList.toggle('hidden', isLoading);
+      if (isLoading) {
+        document.getElementById('module-inventory').classList.add('hidden');
+        document.getElementById('module-sales').classList.add('hidden');
+      } else {
+        if (currentModule === 'inventory') {
+          document.getElementById('module-inventory').classList.remove('hidden');
+        } else {
+          document.getElementById('module-sales').classList.remove('hidden');
+        }
+      }
     }
 
     async function loadData() {
@@ -329,7 +635,9 @@
         if (json.status === 'ok') {
           inventory = json.data || [];
           updateFilters();
+          updateSalesFilters();
           renderResults();
+          renderSalesModule();
         } else {
           alert('Error: ' + json.message);
         }
@@ -350,7 +658,9 @@
         if (json.status === 'ok') {
           inventory = json.data || [];
           updateFilters();
+          updateSalesFilters();
           renderResults();
+          renderSalesModule();
         } else {
           alert('Error al guardar: ' + json.message);
         }
@@ -476,6 +786,13 @@
       return '$' + num.toFixed(2);
     }
 
+    function formatDateShort(isoStr) {
+      if (!isoStr) return '-';
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return isoStr;
+      return d.toLocaleDateString('es-VE', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
     function selectGroupColor(groupKey, color) {
       selectedColorByGroup[groupKey] = color;
       renderResults();
@@ -509,7 +826,9 @@
         return matchSearch && matchCat && matchPrice && matchColor && matchTalla && matchStatus;
       });
 
-      document.getElementById('stat-total').textContent = filtered.reduce((acc, i) => acc + i.cantidad, 0);
+      if (currentModule === 'inventory') {
+        document.getElementById('stat-total').textContent = filtered.reduce((acc, i) => acc + i.cantidad, 0);
+      }
 
       const groupedEl = document.getElementById('grouped-view');
       const individualEl = document.getElementById('individual-view');
@@ -578,7 +897,6 @@
           ? `<img src="${activeImg}" onclick="showImage('${activeImg}', '${group.item} · ${activeColor}')" class="w-20 h-20 shrink-0 object-cover rounded-2xl border border-teal-100 cursor-pointer hover:scale-105 transition shadow-xs" onerror="this.src='https://placehold.co/120x120/f0fdfa/0d9488?text=Sin+Foto'">`
           : `<div class="w-20 h-20 shrink-0 rounded-2xl bg-gradient-to-br from-teal-50 to-purple-50 border border-purple-100 flex items-center justify-center text-purple-300 text-xs font-semibold text-center leading-tight">Sin<br>foto</div>`;
 
-        // Si tiene 1 solo color: texto fijo neutro; si tiene varios: botones seleccionables
         const colorSectionHtml = hasMultipleColors
           ? colors.map(c => {
               const isSelected = c === activeColor;
@@ -625,9 +943,9 @@
               </div>
 
               <div class="flex items-center gap-1.5">
-                <button onclick="changeStock('${v.id}', -1)" class="${STOCK_BTN_CLASS}">-</button>
+                <button onclick="changeStock('${v.id}', -1)" title="Vender 1 unidad" class="${STOCK_BTN_CLASS}">-</button>
                 <div class="min-w-[72px] text-center">${qtyBadge}</div>
-                <button onclick="changeStock('${v.id}', 1)" class="${STOCK_BTN_CLASS}">+</button>
+                <button onclick="changeStock('${v.id}', 1)" title="Agregar 1 unidad" class="${STOCK_BTN_CLASS}">+</button>
               </div>
 
               <div class="flex items-center gap-2">
@@ -712,9 +1030,9 @@
             </td>
             <td class="py-3 px-4 whitespace-nowrap">
               <div class="flex items-center justify-center gap-2">
-                <button onclick="changeStock('${p.id}', -1)" class="${STOCK_BTN_CLASS}">-</button>
+                <button onclick="changeStock('${p.id}', -1)" title="Vender 1 unidad" class="${STOCK_BTN_CLASS}">-</button>
                 <div class="min-w-[76px] text-center">${badge}</div>
-                <button onclick="changeStock('${p.id}', 1)" class="${STOCK_BTN_CLASS}">+</button>
+                <button onclick="changeStock('${p.id}', 1)" title="Agregar 1 unidad" class="${STOCK_BTN_CLASS}">+</button>
               </div>
             </td>
             <td class="py-3 px-4 text-right space-x-2.5 whitespace-nowrap">
@@ -726,15 +1044,256 @@
       }).join('');
     }
 
-    async function changeStock(id, delta) {
+    // ==================== LÓGICA DE HISTÓRICO DE VENTAS (SOLO EN EL SITIO) ====================
+    function updateSalesFilters() {
+      const monthsSet = new Set();
+      salesHistory.forEach(s => {
+        if (s.fecha) {
+          const d = new Date(s.fecha);
+          if (!isNaN(d.getTime())) {
+            const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            monthsSet.add(ym);
+          }
+        }
+      });
+
+      const monthEl = document.getElementById('sales-month-filter');
+      const currentMonth = monthEl.value;
+      const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      monthEl.innerHTML = `<option value="">Mes: Todos</option>` + Array.from(monthsSet).sort().reverse().map(ym => {
+        const [y, m] = ym.split('-');
+        return `<option value="${ym}">${monthNames[Number(m) - 1]} ${y}</option>`;
+      }).join('');
+      monthEl.value = currentMonth;
+
+      const cats = [...new Set(salesHistory.map(s => s.categoria).filter(Boolean))].sort();
+      fillSelect('sales-cat-filter', cats, 'Categoría: Todas');
+
+      const outItems = inventory.filter(i => i.cantidad === 0);
+      document.getElementById('nav-sales-badge').textContent = salesHistory.length;
+      document.getElementById('out-pill-count').textContent = outItems.length;
+      document.getElementById('sales-out-of-stock-count').textContent = outItems.length;
+    }
+
+    function renderSalesModule() {
+      const search = (document.getElementById('sales-search').value || '').toLowerCase();
+      const fMonth = document.getElementById('sales-month-filter').value;
+      const fCat = document.getElementById('sales-cat-filter').value;
+
+      const filteredSales = salesHistory.filter(s => {
+        const matchSearch = (s.item || '').toLowerCase().includes(search) || 
+                            (s.color || '').toLowerCase().includes(search) ||
+                            (s.nota || '').toLowerCase().includes(search);
+        const matchCat = !fCat || s.categoria === fCat;
+        let matchMonth = true;
+        if (fMonth && s.fecha) {
+          const d = new Date(s.fecha);
+          if (!isNaN(d.getTime())) {
+            const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            matchMonth = ym === fMonth;
+          }
+        }
+        return matchSearch && matchCat && matchMonth;
+      });
+
+      const totalRevenue = filteredSales.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+      const totalUnits = filteredSales.reduce((acc, s) => acc + (Number(s.cantidad) || 0), 0);
+
+      document.getElementById('sales-total-revenue').textContent = formatPrice(totalRevenue);
+      document.getElementById('sales-total-units').textContent = totalUnits;
+      document.getElementById('sales-foot-qty').textContent = totalUnits;
+      document.getElementById('sales-foot-total').textContent = formatPrice(totalRevenue);
+
+      if (currentModule === 'sales') {
+        document.getElementById('stat-total').textContent = formatPrice(totalRevenue);
+      }
+
+      const tbody = document.getElementById('sales-body');
+      if (filteredSales.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-10 text-center text-slate-500">Aún no hay ventas registradas. Cada vez que descuentes stock (-) o uses "+ Registrar Venta" aparecerá aquí.</td></tr>`;
+      } else {
+        tbody.innerHTML = filteredSales.map(s => {
+          const imgHtml = s.imagen 
+            ? `<img src="${s.imagen}" onclick="showImage('${s.imagen}', '${s.item} · ${s.color}')" class="w-10 h-10 object-cover rounded-xl border border-teal-100 cursor-pointer shadow-2xs" onerror="this.src='https://placehold.co/80x80/f0fdfa/0d9488?text=Sin+Foto'">`
+            : `<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-50 to-purple-50 border border-purple-100 flex items-center justify-center text-purple-300 text-[9px] font-semibold">Sin foto</div>`;
+
+          return `
+            <tr class="hover:bg-purple-50/30 transition">
+              <td class="py-3 px-4 text-xs font-semibold text-slate-500 whitespace-nowrap">${formatDateShort(s.fecha)}</td>
+              <td class="py-2.5 px-4">${imgHtml}</td>
+              <td class="py-3 px-4 whitespace-nowrap">
+                <div class="font-bold text-slate-800">${s.item}</div>
+                <div class="text-[11px] text-slate-400">${s.categoria}${s.nota ? ' · ' + s.nota : ''}</div>
+              </td>
+              <td class="py-3 px-4 whitespace-nowrap">
+                <div class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700">
+                  ${renderColorDot(s.color)}
+                  <span>${s.color}</span>
+                  <span class="px-2 py-0.5 bg-purple-50 text-purple-700 border border-purple-200/70 rounded-md font-bold ml-1">${s.talla}</span>
+                </div>
+              </td>
+              <td class="py-3 px-4 text-center font-extrabold text-purple-700 whitespace-nowrap">${s.cantidad}</td>
+              <td class="py-3 px-4 text-right font-medium text-slate-600 whitespace-nowrap">${formatPrice(s.precioUnitario)}</td>
+              <td class="py-3 px-4 text-right font-extrabold text-teal-700 whitespace-nowrap">${formatPrice(s.total)}</td>
+              <td class="py-3 px-4 text-right whitespace-nowrap">
+                <button onclick="removeSaleRecord('${s.id}')" title="Eliminar registro de venta" class="text-xs font-bold text-rose-500 hover:text-rose-700 hover:underline">Anular</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Prendas No Disponibles (Stock === 0 en tu Google Sheet)
+      const outItems = inventory.filter(i => i.cantidad === 0);
+      const outBody = document.getElementById('out-of-stock-body');
+      if (outItems.length === 0) {
+        outBody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-slate-500">¡Todas tus prendas tienen stock disponible en este momento!</td></tr>`;
+      } else {
+        outBody.innerHTML = outItems.map(p => {
+          const soldCount = salesHistory
+            .filter(s => s.item === p.item && s.color === p.color && s.talla === p.talla)
+            .reduce((sum, s) => sum + (Number(s.cantidad) || 0), 0);
+
+          const imgHtml = p.imagen 
+            ? `<img src="${p.imagen}" onclick="showImage('${p.imagen}', '${p.item} · ${p.color}')" class="w-11 h-11 object-cover rounded-xl border border-rose-100 cursor-pointer shadow-2xs" onerror="this.src='https://placehold.co/80x80/fff1f2/e11d48?text=Agotado'">`
+            : `<div class="w-11 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-300 text-[10px] font-semibold">Agotado</div>`;
+
+          return `
+            <tr class="hover:bg-rose-50/30 transition">
+              <td class="py-2.5 px-4">${imgHtml}</td>
+              <td class="py-3 px-4 font-bold text-slate-800 whitespace-nowrap">${p.item}</td>
+              <td class="py-3 px-4 text-xs font-medium text-slate-500 whitespace-nowrap">${p.categoria}</td>
+              <td class="py-3 px-4 whitespace-nowrap">
+                <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700">
+                  ${renderColorDot(p.color)}
+                  <span>${p.color}</span>
+                  <span class="px-2 py-0.5 bg-purple-50 text-purple-700 border border-purple-200/70 rounded-md font-bold ml-1">${p.talla}</span>
+                </span>
+              </td>
+              <td class="py-3 px-4 text-right font-bold text-teal-700 whitespace-nowrap">${formatPrice(p.precio)}</td>
+              <td class="py-3 px-4 text-center whitespace-nowrap">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800">${soldCount} unid.</span>
+              </td>
+              <td class="py-3 px-4 text-right whitespace-nowrap">
+                <button onclick="restockItem('${p.id}', 1)" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-teal-50 text-teal-700 hover:bg-teal-100 border border-teal-200 transition">
+                  + Reponer 1
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    async function changeStock(id, delta, recordAsSale = true) {
       const item = inventory.find(i => i.id === id);
       if (item) {
+        const prevQty = item.cantidad;
         item.cantidad = Math.max(0, item.cantidad + delta);
+        if (delta < 0 && recordAsSale && prevQty > 0) {
+          const soldQty = Math.min(prevQty, Math.abs(delta));
+          addLocalSaleEntry({
+            categoria: item.categoria,
+            item: item.item,
+            color: item.color,
+            talla: item.talla,
+            cantidad: soldQty,
+            precioUnitario: Number(item.precio) || 0,
+            imagen: item.imagen || '',
+            nota: 'Venta (-1)'
+          });
+        }
         renderResults();
       }
       await sendAction({ action: 'updateStock', id: id, delta: delta });
     }
 
+    async function restockItem(id, qty) {
+      await changeStock(id, qty, false);
+    }
+
+    function removeSaleRecord(saleId) {
+      if (!confirm('¿Anular y quitar esta venta del historial del sitio?')) return;
+      salesHistory = salesHistory.filter(s => s.id !== saleId);
+      saveLocalSales();
+      updateSalesFilters();
+      renderSalesModule();
+    }
+
+    function clearSalesHistory() {
+      if (salesHistory.length === 0) return;
+      if (!confirm('¿Vaciar todo el historial de ventas guardado en este navegador?')) return;
+      salesHistory = [];
+      saveLocalSales();
+      updateSalesFilters();
+      renderSalesModule();
+    }
+
+    // Modal Registrar Venta Manual
+    function openSaleModal() {
+      const select = document.getElementById('sale-product-select');
+      const sorted = [...inventory].sort((a, b) => a.item.localeCompare(b.item));
+      select.innerHTML = `<option value="">Selecciona una prenda...</option>` + sorted.map(p => {
+        return `<option value="${p.id}">${p.item} · ${p.color} (${p.talla}) — ${formatPrice(p.precio)} [Disp: ${p.cantidad}]</option>`;
+      }).join('');
+      document.getElementById('sale-form').reset();
+      document.getElementById('sale-preview-total').textContent = '$0.00';
+      document.getElementById('sale-modal').classList.remove('hidden');
+    }
+
+    function closeSaleModal() {
+      document.getElementById('sale-modal').classList.add('hidden');
+    }
+
+    function fillSaleFromProduct() {
+      const id = document.getElementById('sale-product-select').value;
+      const prod = inventory.find(p => p.id === id);
+      if (prod) {
+        document.getElementById('sale-price').value = prod.precio || 0;
+        updateSalePreviewTotal();
+      }
+    }
+
+    function updateSalePreviewTotal() {
+      const qty = Number(document.getElementById('sale-qty').value) || 0;
+      const price = Number(document.getElementById('sale-price').value) || 0;
+      document.getElementById('sale-preview-total').textContent = formatPrice(qty * price);
+    }
+
+    async function handleSaveSale(e) {
+      e.preventDefault();
+      const id = document.getElementById('sale-product-select').value;
+      const prod = inventory.find(p => p.id === id);
+      if (!prod) return;
+
+      const btn = document.getElementById('save-sale-btn');
+      btn.disabled = true;
+      btn.textContent = 'Registrando...';
+
+      const qtySold = Math.max(1, Number(document.getElementById('sale-qty').value) || 1);
+      const unitPrice = Number(document.getElementById('sale-price').value) || 0;
+      const note = document.getElementById('sale-note').value.trim() || 'Venta manual';
+
+      addLocalSaleEntry({
+        categoria: prod.categoria,
+        item: prod.item,
+        color: prod.color,
+        talla: prod.talla,
+        cantidad: qtySold,
+        precioUnitario: unitPrice,
+        imagen: prod.imagen || '',
+        nota: note
+      });
+
+      // Descuenta la cantidad vendida en la hoja de inventario existente
+      await changeStock(prod.id, -qtySold, false);
+
+      closeSaleModal();
+      btn.disabled = false;
+      btn.textContent = 'Registrar Venta';
+    }
+
+    // Modal Producto Inventario
     function openModal() {
       document.getElementById('modal-title').textContent = 'Agregar Producto';
       document.getElementById('product-form').reset();
