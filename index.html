@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Glow Up · Control de Inventario y Ventas</title>
+  <title>Glow Up · Catálogo e Inventario</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -28,7 +28,7 @@
 </head>
 <body class="text-slate-800 p-3.5 md:p-6">
 
-  <div class="max-w-5xl mx-auto">
+  <div class="max-w-6xl mx-auto">
     <!-- Cabecera Principal -->
     <div class="bg-white/90 backdrop-blur-md p-4 md:p-5 rounded-2xl border border-purple-100 shadow-sm flex flex-col gap-3.5 mb-5">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3.5">
@@ -40,15 +40,15 @@
             class="h-11 w-11 md:h-14 md:w-14 object-contain rounded-xl bg-gradient-to-br from-teal-50 to-purple-50 p-1 border border-teal-100 shadow-2xs"
           >
           <div>
-            <h1 class="text-lg md:text-2xl font-extrabold bg-gradient-to-r from-teal-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
+            <h1 id="main-header-title" class="text-lg md:text-2xl font-extrabold bg-gradient-to-r from-teal-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
               Glow Up · Gestión
             </h1>
-            <p class="text-xs md:text-sm text-slate-500 font-medium">Catálogo visual e histórico de ventas</p>
+            <p id="main-header-subtitle" class="text-xs md:text-sm text-slate-500 font-medium">Catálogo visual e histórico de ventas</p>
           </div>
         </div>
 
-        <div class="flex items-center justify-between md:justify-end gap-2.5 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
-          <!-- Indicador dinámico según módulo -->
+        <!-- Controles de Administración (Se ocultan automáticamente en Vista Clientes) -->
+        <div id="admin-header-controls" class="flex items-center justify-between md:justify-end gap-2.5 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
           <div class="glow-gradient-soft border border-purple-200/70 px-3.5 py-1.5 rounded-xl flex items-center gap-2.5">
             <div>
               <div id="header-stat-label" class="text-[10px] font-bold uppercase tracking-wider text-purple-700">Total Unidades</div>
@@ -67,8 +67,8 @@
         </div>
       </div>
 
-      <!-- Navegación de Módulos: Inventario vs Histórico de Ventas -->
-      <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+      <!-- Navegación de Módulos en 1 Clic -->
+      <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
         <button 
           id="nav-inventory" 
           onclick="switchModule('inventory')" 
@@ -84,23 +84,29 @@
           <span>Histórico de Ventas</span>
           <span id="nav-sales-badge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-purple-100 text-purple-700 font-extrabold">0</span>
         </button>
+        <button 
+          id="nav-client" 
+          onclick="switchModule('client')" 
+          class="w-full sm:w-auto sm:ml-auto px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-teal-50/80 text-teal-800 hover:bg-teal-100 border border-teal-200/90"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span>Vista Clientes</span>
+        </button>
       </div>
     </div>
 
     <!-- Cargando -->
     <div id="loading" class="flex justify-center items-center py-14">
       <div class="loader ease-linear rounded-full border-4 border-slate-200 h-10 w-10"></div>
-      <span class="ml-3 text-sm font-semibold text-purple-700">Sincronizando inventario Glow Up...</span>
+      <span class="ml-3 text-sm font-semibold text-purple-700">Sincronizando catálogo Glow Up...</span>
     </div>
 
-    <!-- ==================== MÓDULO 1: INVENTARIO ==================== -->
+    <!-- ==================== MÓDULO 1: INVENTARIO (ADMIN) ==================== -->
     <div id="module-inventory" class="hidden">
-      <!-- Pestañas rápidas por Categoría + Selector de Vista -->
       <div class="mb-4">
         <div class="flex items-center justify-between gap-2 mb-2 px-1">
           <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Categorías</span>
           
-          <!-- Interruptor Vista General vs Vista Detallada -->
           <div class="inline-flex items-center bg-white/90 p-1 rounded-xl border border-purple-100 shadow-2xs" role="group" aria-label="Modo de vista">
             <button 
               id="btn-view-grouped" 
@@ -126,7 +132,7 @@
         <div id="category-tabs" class="flex flex-wrap gap-1.5 md:gap-2"></div>
       </div>
 
-      <!-- Barra de filtros secundarios + Rango de Precio + Botón Limpiar -->
+      <!-- Barra de filtros secundarios -->
       <div class="bg-white/90 backdrop-blur-md p-3 md:p-3.5 rounded-2xl border border-teal-100 shadow-sm mb-5">
         <div class="grid grid-cols-2 lg:grid-cols-12 gap-2 items-center">
           <div class="col-span-2 lg:col-span-3">
@@ -166,10 +172,10 @@
         </div>
       </div>
 
-      <!-- Vista 1: Agrupada por Modelo (Vista General) -->
+      <!-- Vista 1: Agrupada por Modelo (Vista General Admin) -->
       <div id="grouped-view" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
 
-      <!-- Vista 2: Tabla en Columnas (Vista Detallada y al filtrar categoría) -->
+      <!-- Vista 2: Tabla en Columnas (Vista Detallada Admin) -->
       <div id="individual-view" class="hidden bg-white rounded-2xl border border-purple-100 shadow-sm overflow-x-auto">
         <table class="w-full min-w-[680px] text-left border-collapse">
           <thead>
@@ -188,9 +194,8 @@
       </div>
     </div>
 
-    <!-- ==================== MÓDULO 2: HISTÓRICO DE VENTAS ==================== -->
+    <!-- ==================== MÓDULO 2: HISTÓRICO DE VENTAS (ADMIN) ==================== -->
     <div id="module-sales" class="hidden space-y-5">
-      <!-- Tarjetas de Resumen Financiero y Stock Agotado -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
         <div class="bg-white/95 rounded-2xl border border-teal-200/80 p-4 shadow-xs">
           <div class="text-[11px] font-bold uppercase tracking-wider text-teal-700">Ganancias Totales</div>
@@ -211,7 +216,6 @@
         </div>
       </div>
 
-      <!-- Sub-pestañas dentro de Histórico: Ventas Realizadas vs Prendas No Disponibles -->
       <div class="bg-white/90 backdrop-blur-md p-3 md:p-3.5 rounded-2xl border border-purple-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div class="inline-flex bg-slate-100 p-1 rounded-xl self-start">
           <button 
@@ -231,7 +235,6 @@
           </button>
         </div>
 
-        <!-- Filtros del Histórico -->
         <div id="sales-filters-bar" class="grid grid-cols-2 sm:flex items-center gap-2 flex-1 md:justify-end">
           <input 
             type="text" 
@@ -264,7 +267,6 @@
         </div>
       </div>
 
-      <!-- Vista A: Tabla de Histórico de Ventas -->
       <div id="sales-list-container" class="bg-white rounded-2xl border border-purple-100 shadow-sm overflow-x-auto">
         <table class="w-full min-w-[720px] text-left border-collapse">
           <thead>
@@ -292,7 +294,6 @@
         </table>
       </div>
 
-      <!-- Vista B: Prendas Agotadas (No disponibles actualmente en stock) -->
       <div id="sales-out-container" class="hidden bg-white rounded-2xl border border-rose-100 shadow-sm overflow-x-auto">
         <table class="w-full min-w-[680px] text-left border-collapse">
           <thead>
@@ -309,6 +310,49 @@
           <tbody id="out-of-stock-body" class="divide-y divide-slate-100 text-sm"></tbody>
         </table>
       </div>
+    </div>
+
+    <!-- ==================== MÓDULO 3: VISTA CLIENTES (TIENDA ONLINE) ==================== -->
+    <div id="module-client" class="hidden">
+      <!-- Pestañas de Categoría para Clientes -->
+      <div class="mb-4">
+        <div id="client-category-tabs" class="flex flex-wrap gap-1.5 md:gap-2"></div>
+      </div>
+
+      <!-- Barra de filtros limpia para Clientes -->
+      <div class="bg-white/90 backdrop-blur-md p-3 md:p-3.5 rounded-2xl border border-purple-100 shadow-sm mb-5">
+        <div class="grid grid-cols-2 md:grid-cols-12 gap-2 items-center">
+          <div class="col-span-2 md:col-span-4">
+            <input type="text" id="client-search" oninput="renderClientCatalog()" placeholder="Buscar prenda o estilo..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-slate-50/50">
+          </div>
+          <div class="col-span-1 md:col-span-3">
+            <select id="client-filter-price" onchange="renderClientCatalog()" class="w-full px-2.5 py-2 border border-slate-200 rounded-xl text-xs md:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-400">
+              <option value="">Precio: Todos</option>
+            </select>
+          </div>
+          <div class="col-span-1 md:col-span-2">
+            <select id="client-filter-color" onchange="renderClientCatalog()" class="w-full px-2.5 py-2 border border-slate-200 rounded-xl text-xs md:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400">
+              <option value="">Color: Todos</option>
+            </select>
+          </div>
+          <div class="col-span-2 md:col-span-3 flex items-center gap-1.5">
+            <select id="client-filter-talla" onchange="renderClientCatalog()" class="w-full px-2.5 py-2 border border-slate-200 rounded-xl text-xs md:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400">
+              <option value="">Talla: Todas</option>
+            </select>
+            <button 
+              id="client-clear-btn" 
+              onclick="clearClientFilters()" 
+              class="hidden shrink-0 px-2.5 py-2 rounded-xl text-xs font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200 transition flex items-center gap-1"
+              title="Limpiar filtros"
+            >
+              ✕ <span class="hidden sm:inline">Limpiar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de Productos Estilo Tienda Online (Imágenes Grandes, Sin Cantidades) -->
+      <div id="client-catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
     </div>
   </div>
 
@@ -428,14 +472,15 @@
     let inventory = [];
     let salesHistory = loadLocalSales();
     let selectedCategory = '';
+    let selectedClientCategory = '';
     let selectedColorByGroup = {};
+    let selectedClientColorByGroup = {};
     let viewMode = 'grouped';
-    let currentModule = 'inventory'; // 'inventory' | 'sales'
+    let currentModule = 'inventory'; // 'inventory' | 'sales' | 'client'
     let salesSubtab = 'list'; // 'list' | 'out'
 
     window.onload = loadData;
 
-    // Manejo de ventas exclusivamente en el navegador (localStorage)
     function loadLocalSales() {
       try {
         const raw = localStorage.getItem(LOCAL_SALES_KEY);
@@ -476,40 +521,68 @@
       currentModule = mod;
       const navInv = document.getElementById('nav-inventory');
       const navSales = document.getElementById('nav-sales');
+      const navClient = document.getElementById('nav-client');
+
       const modInv = document.getElementById('module-inventory');
       const modSales = document.getElementById('module-sales');
+      const modClient = document.getElementById('module-client');
+
+      const adminControls = document.getElementById('admin-header-controls');
+      const headerTitle = document.getElementById('main-header-title');
+      const headerSubtitle = document.getElementById('main-header-subtitle');
       const btnPrimary = document.getElementById('btn-primary-action');
       const statLabel = document.getElementById('header-stat-label');
 
       const activeTab = ['glow-gradient', 'text-white', 'shadow-2xs'];
       const inactiveTab = ['bg-slate-50', 'text-slate-600', 'hover:bg-purple-50', 'hover:text-purple-700', 'border', 'border-slate-200/80'];
+      const clientInactive = ['bg-teal-50/80', 'text-teal-800', 'hover:bg-teal-100', 'border', 'border-teal-200/90'];
+
+      // Reset estilos de pestañas
+      [navInv, navSales].forEach(btn => {
+        btn.classList.remove(...activeTab);
+        btn.classList.add(...inactiveTab);
+      });
+      navClient.classList.remove(...activeTab);
+      navClient.classList.add(...clientInactive);
+
+      modInv.classList.add('hidden');
+      modSales.classList.add('hidden');
+      modClient.classList.add('hidden');
 
       if (mod === 'inventory') {
         navInv.classList.add(...activeTab);
         navInv.classList.remove(...inactiveTab);
-        navSales.classList.remove(...activeTab);
-        navSales.classList.add(...inactiveTab);
-
         modInv.classList.remove('hidden');
-        modSales.classList.add('hidden');
 
+        adminControls.classList.remove('hidden');
+        headerTitle.textContent = 'Glow Up · Gestión';
+        headerSubtitle.textContent = 'Catálogo visual e histórico de ventas';
         btnPrimary.textContent = '+ Agregar';
         btnPrimary.onclick = openModal;
         statLabel.textContent = 'Total Unidades';
         renderResults();
-      } else {
+      } else if (mod === 'sales') {
         navSales.classList.add(...activeTab);
         navSales.classList.remove(...inactiveTab);
-        navInv.classList.remove(...activeTab);
-        navInv.classList.add(...inactiveTab);
-
-        modInv.classList.add('hidden');
         modSales.classList.remove('hidden');
 
+        adminControls.classList.remove('hidden');
+        headerTitle.textContent = 'Glow Up · Gestión';
+        headerSubtitle.textContent = 'Histórico de ventas y prendas agotadas';
         btnPrimary.textContent = '+ Registrar Venta';
         btnPrimary.onclick = openSaleModal;
         statLabel.textContent = 'Ganancias Totales';
         renderSalesModule();
+      } else if (mod === 'client') {
+        navClient.classList.add(...activeTab);
+        navClient.classList.remove(...clientInactive);
+        modClient.classList.remove('hidden');
+
+        // Ocultar controles internos de inventario/admin
+        adminControls.classList.add('hidden');
+        headerTitle.textContent = 'Glow Up · Catálogo';
+        headerSubtitle.textContent = 'Ropa deportiva & activa · Disponibilidad en tiempo real';
+        renderClientCatalog();
       }
     }
 
@@ -618,11 +691,14 @@
       if (isLoading) {
         document.getElementById('module-inventory').classList.add('hidden');
         document.getElementById('module-sales').classList.add('hidden');
+        document.getElementById('module-client').classList.add('hidden');
       } else {
         if (currentModule === 'inventory') {
           document.getElementById('module-inventory').classList.remove('hidden');
-        } else {
+        } else if (currentModule === 'sales') {
           document.getElementById('module-sales').classList.remove('hidden');
+        } else {
+          document.getElementById('module-client').classList.remove('hidden');
         }
       }
     }
@@ -636,8 +712,10 @@
           inventory = json.data || [];
           updateFilters();
           updateSalesFilters();
+          updateClientFilters();
           renderResults();
           renderSalesModule();
+          renderClientCatalog();
         } else {
           alert('Error: ' + json.message);
         }
@@ -659,8 +737,10 @@
           inventory = json.data || [];
           updateFilters();
           updateSalesFilters();
+          updateClientFilters();
           renderResults();
           renderSalesModule();
+          renderClientCatalog();
         } else {
           alert('Error al guardar: ' + json.message);
         }
@@ -730,8 +810,8 @@
       container.innerHTML = html;
     }
 
-    function updatePriceRanges() {
-      const el = document.getElementById('filter-price');
+    function updatePriceRanges(selectId = 'filter-price') {
+      const el = document.getElementById(selectId);
       const current = el.value;
       const maxPrice = inventory.reduce((max, i) => Math.max(max, Number(i.precio) || 0), 0);
       const topLimit = Math.max(50, Math.ceil((maxPrice + 1) / 10) * 10);
@@ -752,7 +832,7 @@
       const items = [...new Set(inventory.map(i => i.item))].sort();
 
       renderCategoryTabs();
-      updatePriceRanges();
+      updatePriceRanges('filter-price');
       fillSelect('filter-color', colors, 'Color: Todos');
       fillSelect('filter-talla', tallas, 'Talla: Todas');
 
@@ -846,7 +926,7 @@
 
     const STOCK_BTN_CLASS = "w-7 h-7 rounded-lg bg-purple-50 hover:bg-purple-100 active:bg-purple-200 border border-purple-200 font-bold text-purple-700 text-sm inline-flex items-center justify-center transition shadow-2xs select-none";
 
-    // VISTA 1: General Agrupada por Modelo
+    // VISTA 1: General Agrupada por Modelo (Admin)
     function renderGroupedView(filtered) {
       const container = document.getElementById('grouped-view');
       if (filtered.length === 0) {
@@ -996,7 +1076,7 @@
       }).join('');
     }
 
-    // VISTA 2: Tabla en Columnas (Vista Detallada y al filtrar categoría)
+    // VISTA 2: Tabla en Columnas (Admin)
     function renderIndividualView(filtered) {
       const tbody = document.getElementById('inventory-body');
 
@@ -1044,7 +1124,224 @@
       }).join('');
     }
 
-    // ==================== LÓGICA DE HISTÓRICO DE VENTAS (SOLO EN EL SITIO) ====================
+    // ==================== MÓDULO 3: CATÁLOGO PARA CLIENTES ====================
+    function updateClientFilters() {
+      const availableItems = inventory.filter(i => i.cantidad > 0);
+      const colors = [...new Set(availableItems.map(i => i.color))].sort();
+      const tallas = [...new Set(availableItems.map(i => i.talla))].sort();
+
+      renderClientCategoryTabs();
+      updatePriceRanges('client-filter-price');
+      fillSelect('client-filter-color', colors, 'Color: Todos');
+      fillSelect('client-filter-talla', tallas, 'Talla: Todas');
+    }
+
+    function selectClientCategory(cat) {
+      selectedClientCategory = cat;
+      renderClientCategoryTabs();
+      renderClientCatalog();
+    }
+
+    function clearClientFilters() {
+      selectedClientCategory = '';
+      document.getElementById('client-search').value = '';
+      document.getElementById('client-filter-price').value = '';
+      document.getElementById('client-filter-color').value = '';
+      document.getElementById('client-filter-talla').value = '';
+      renderClientCategoryTabs();
+      renderClientCatalog();
+    }
+
+    function selectClientGroupColor(groupKey, color) {
+      selectedClientColorByGroup[groupKey] = color;
+      renderClientCatalog();
+    }
+
+    function renderClientCategoryTabs() {
+      // Solo categorías que tengan al menos 1 prenda disponible
+      const availableItems = inventory.filter(i => i.cantidad > 0);
+      const cats = [...new Set(availableItems.map(i => i.categoria))].sort();
+      const container = document.getElementById('client-category-tabs');
+
+      const allActive = selectedClientCategory === '' 
+        ? 'glow-gradient text-white shadow-sm border-transparent' 
+        : 'bg-white text-slate-600 border border-teal-200/80 hover:border-purple-300 hover:bg-purple-50/40';
+
+      let html = `<button onclick="selectClientCategory('')" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition ${allActive}">Todo el Catálogo</button>`;
+
+      cats.forEach(c => {
+        const active = selectedClientCategory === c 
+          ? 'glow-gradient text-white shadow-sm border-transparent' 
+          : 'bg-white text-slate-600 border border-teal-200/80 hover:border-purple-300 hover:bg-purple-50/40';
+        html += `<button onclick="selectClientCategory('${c.replace(/'/g, "\\'")}')" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition ${active}">${c}</button>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function renderClientCatalog() {
+      const search = (document.getElementById('client-search').value || '').toLowerCase();
+      const fPrice = document.getElementById('client-filter-price').value;
+      const fColor = document.getElementById('client-filter-color').value;
+      const fTalla = document.getElementById('client-filter-talla').value;
+
+      const isAnyActive = search !== '' || selectedClientCategory !== '' || fPrice !== '' || fColor !== '' || fTalla !== '';
+      document.getElementById('client-clear-btn').classList.toggle('hidden', !isAnyActive);
+
+      // Filtramos solo prendas con stock disponible (> 0)
+      const availableFiltered = inventory.filter(p => {
+        if (p.cantidad <= 0) return false;
+        const priceNum = Number(p.precio) || 0;
+        const matchSearch = p.item.toLowerCase().includes(search) || p.categoria.toLowerCase().includes(search);
+        const matchCat = !selectedClientCategory || p.categoria === selectedClientCategory;
+        const matchColor = !fColor || p.color === fColor;
+        const matchTalla = !fTalla || p.talla === fTalla;
+
+        let matchPrice = true;
+        if (fPrice) {
+          const [minP, maxP] = fPrice.split('-').map(Number);
+          matchPrice = priceNum >= minP && priceNum <= maxP;
+        }
+
+        return matchSearch && matchCat && matchPrice && matchColor && matchTalla;
+      });
+
+      const container = document.getElementById('client-catalog-grid');
+      if (availableFiltered.length === 0) {
+        container.innerHTML = `<div class="col-span-full bg-white rounded-2xl border border-purple-100 p-12 text-center text-sm text-slate-500">No hay prendas disponibles con esos filtros en este momento.</div>`;
+        return;
+      }
+
+      // Agrupar por modelo
+      const groupsMap = new Map();
+      availableFiltered.forEach(p => {
+        const key = `${p.categoria}|||${p.item}`;
+        if (!groupsMap.has(key)) {
+          groupsMap.set(key, {
+            key: key,
+            categoria: p.categoria,
+            item: p.item,
+            variants: []
+          });
+        }
+        groupsMap.get(key).variants.push(p);
+      });
+
+      const sizeOrder = { 'XS': 1, 'S': 2, 'M': 3, 'L': 4, 'XL': 5, 'XXL': 6, 'Única': 7 };
+
+      container.innerHTML = Array.from(groupsMap.values()).map(group => {
+        const colors = [...new Set(group.variants.map(v => v.color))];
+        const hasMultipleColors = colors.length > 1;
+
+        let activeColor = selectedClientColorByGroup[group.key];
+        if (!activeColor || !colors.includes(activeColor)) {
+          activeColor = colors[0];
+          selectedClientColorByGroup[group.key] = activeColor;
+        }
+
+        const colorVariants = group.variants
+          .filter(v => v.color === activeColor)
+          .sort((a, b) => (sizeOrder[a.talla] || 99) - (sizeOrder[b.talla] || 99));
+
+        const activeImg = (colorVariants.find(v => v.imagen) || group.variants.find(v => v.imagen) || {}).imagen || '';
+
+        const prices = [...new Set(colorVariants.map(v => Number(v.precio) || 0))];
+        const priceDisplay = prices.length === 1 
+          ? formatPrice(prices[0]) 
+          : `${formatPrice(Math.min(...prices))} - ${formatPrice(Math.max(...prices))}`;
+
+        // Imagen grande estilo e-commerce (aspect-[4/5])
+        const bigImageHtml = activeImg
+          ? `<div onclick="showImage('${activeImg}', '${group.item} · ${activeColor}')" class="relative aspect-[4/5] w-full overflow-hidden bg-slate-100 cursor-pointer group">
+               <img src="${activeImg}" alt="${group.item}" class="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x750/f0fdfa/0d9488?text=Glow+Up'">
+               <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/90 backdrop-blur-xs text-purple-800 shadow-2xs">
+                 ${group.categoria}
+               </span>
+               <span class="absolute bottom-3 right-3 px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-900/60 backdrop-blur-xs text-white opacity-0 group-hover:opacity-100 transition">
+                 Ampliar foto
+               </span>
+             </div>`
+          : `<div class="relative aspect-[4/5] w-full bg-gradient-to-br from-teal-50 via-purple-50 to-fuchsia-50 flex flex-col items-center justify-center text-purple-300 p-6 text-center">
+               <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/90 text-purple-800">
+                 ${group.categoria}
+               </span>
+               <span class="text-sm font-bold">Glow Up</span>
+               <span class="text-xs mt-1">Imagen próximamente</span>
+             </div>`;
+
+        // Selector de color sin conteo de unidades
+        const colorSectionHtml = hasMultipleColors
+          ? colors.map(c => {
+              const isSelected = c === activeColor;
+              const pillStyle = isSelected
+                ? 'glow-gradient text-white shadow-xs border-transparent'
+                : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-purple-300 hover:bg-purple-50/50';
+              const escapedKey = group.key.replace(/'/g, "\\'");
+              const escapedColor = c.replace(/'/g, "\\'");
+              return `
+                <button 
+                  onclick="selectClientGroupColor('${escapedKey}', '${escapedColor}')" 
+                  class="px-3 py-1.5 rounded-xl text-xs font-bold border transition flex items-center gap-1.5 ${pillStyle}"
+                >
+                  ${renderColorDot(c, isSelected)}
+                  <span>${c}</span>
+                </button>
+              `;
+            }).join('')
+          : `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100/90 text-slate-700 border border-slate-200/80 select-none">
+              ${renderColorDot(colors[0], false)}
+              <span>${colors[0]}</span>
+             </span>`;
+
+        // Solo las tallas disponibles (sin números de cantidad ni botones de edición)
+        const uniqueAvailableSizes = [...new Set(colorVariants.map(v => v.talla))];
+        const sizesPillsHtml = uniqueAvailableSizes.map(talla => `
+          <span class="min-w-[38px] text-center px-3 py-1.5 bg-purple-50/80 text-purple-800 border border-purple-200/80 rounded-xl text-xs font-extrabold">
+            ${talla}
+          </span>
+        `).join('');
+
+        return `
+          <div class="bg-white rounded-3xl border border-purple-100/90 overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between">
+            <div>
+              ${bigImageHtml}
+              <div class="p-4 md:p-5">
+                <div class="flex items-start justify-between gap-2.5">
+                  <h3 class="font-extrabold text-slate-900 text-base md:text-lg leading-snug">${group.item}</h3>
+                  <span class="shrink-0 font-extrabold text-base text-teal-700 bg-teal-50 px-3 py-1 rounded-xl border border-teal-100">
+                    ${priceDisplay}
+                  </span>
+                </div>
+
+                <!-- Colores -->
+                <div class="mt-3.5">
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                    ${hasMultipleColors ? 'Colores disponibles' : 'Color'}
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    ${colorSectionHtml}
+                  </div>
+                </div>
+
+                <!-- Tallas disponibles (solo etiquetas, sin cantidades) -->
+                <div class="mt-4 pt-3.5 border-t border-slate-100">
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+                    <span>Tallas disponibles en</span>
+                    ${renderColorDot(activeColor)}
+                    <span class="text-slate-600">${activeColor}</span>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    ${sizesPillsHtml}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==================== LÓGICA DE HISTÓRICO DE VENTAS ====================
     function updateSalesFilters() {
       const monthsSet = new Set();
       salesHistory.forEach(s => {
@@ -1143,7 +1440,6 @@
         }).join('');
       }
 
-      // Prendas No Disponibles (Stock === 0 en tu Google Sheet)
       const outItems = inventory.filter(i => i.cantidad === 0);
       const outBody = document.getElementById('out-of-stock-body');
       if (outItems.length === 0) {
@@ -1204,6 +1500,7 @@
           });
         }
         renderResults();
+        renderClientCatalog();
       }
       await sendAction({ action: 'updateStock', id: id, delta: delta });
     }
@@ -1285,7 +1582,6 @@
         nota: note
       });
 
-      // Descuenta la cantidad vendida en la hoja de inventario existente
       await changeStock(prod.id, -qtySold, false);
 
       closeSaleModal();
